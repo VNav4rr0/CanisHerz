@@ -1,20 +1,55 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Provider as PaperProvider } from 'react-native-paper';
+
+import Boasvindas from './src/boasvindas';
+import SobreNos from './src/sobreNos';
+import Formulario from './src/formulario';
+import CarregamentoNovo from './src/carregamentoNovo';
+import Home from './src/home';
+
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <PaperProvider>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            animation: 'ios',
+            transitionSpec: {
+              open: {
+                animation: 'timing',
+                config: {
+                  duration: 100,
+                },
+              },
+              close: {
+                animation: 'timing',
+                config: {
+                  duration: 100,
+                },
+              },
+            },
+            cardStyleInterpolator: ({ current }) => {
+              return {
+                cardStyle: {
+                  opacity: current.progress,
+                },
+              };
+            },
+          }}
+        >
+          <Stack.Screen name="Boasvindas" component={Boasvindas} />
+          <Stack.Screen name="Formulario" component={Formulario} />
+          <Stack.Screen name="SobreNos" component={SobreNos} />
+          <Stack.Screen name="CarregamentoNovo" component={CarregamentoNovo} />
+          <Stack.Screen name="Home" component={Home} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
