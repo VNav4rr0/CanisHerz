@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingHorizontal: 24,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFF",
   },
   img: {
     height: 400,
