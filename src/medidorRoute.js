@@ -148,16 +148,18 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
 
-  infoContainer: {
+   infoContainer: {
+    top: 19,
     padding: 18,
-    backgroundColor: "#F4F4F4", // Cor mais escura que o branco
-    borderBottomLeftRadius: 18,  // Arredondado somente na parte inferior
-    borderBottomRightRadius: 18, // Arredondado somente na parte inferior
-    marginHorizontal: 2, // Diminui a margem lateral para deixar mais largo
+    backgroundColor: "#F4F4F4",
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    marginHorizontal: 1,
     marginVertical: 37,
-    marginTop: -0,
-    borderWidth: 1,  // Aumente o valor para tornar a borda mais espessa
-    borderColor: '#000',  // Cor preta para a borda (pode mudar a cor se necessário)
+    marginTop: -20, // Reduzindo para aproximar do nome
+    borderWidth: 1,
+    borderColor: '#000',
+    
   },
   
   petInfo: {
