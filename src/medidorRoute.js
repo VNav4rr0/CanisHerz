@@ -1,31 +1,73 @@
 import React, { useState } from "react";
-import { Text, StyleSheet, View, ScrollView } from "react-native";
-import { Card, Button, Icon, Modal, Portal, Provider } from 'react-native-paper';
+import { Text, StyleSheet, View, ScrollView, ImageBackground } from "react-native";
+import { Button, Icon, Modal, Portal, Provider, List } from 'react-native-paper';
 
 const MedidorRoute = () => {
-  const [selected, setSelected] = useState("Inicio");
   const [visible, setVisible] = useState(false);
+  const [expanded, setExpanded] = useState(false); // Para controlar o dropdown
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
+  const handlePress = () => setExpanded(!expanded); // Função para alternar expandir/colapsar
 
   return (
     <Provider>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        <View style={styles.cardContainer}>
-          <Card>
-            <Card.Cover style={styles.img} source={require("../assets/Pitico.png")} />
-            <View style={styles.overlay}>
-              <Text style={styles.selectText}>Selecione</Text>
-              <Text style={styles.petName}>Pitico</Text>
-            </View>
-          </Card>
+        {/* Cabeçalho com imagem de fundo e bordas arredondadas */}
+        <ImageBackground
+          source={require('../assets/header.png')}
+          style={styles.headerBackground}
+          imageStyle={styles.headerImage}
+        >
+          <View style={styles.overlay}>
+            <Text style={styles.petName}>Pitico</Text>
+          </View>
+        </ImageBackground>
+
+        {/* Informações fora do background */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.petInfo}>Informações do Cão</Text>
+          <Text style={styles.petDetails}>Peso: 30kg</Text>
+          <Text style={styles.petDetails}>Idade: 1 ano</Text>
         </View>
-        
+
+        {/* Seção de Cães cadastrados */}
+        <List.Section>
+          <List.Accordion
+            title="Cães cadastrados"
+            expanded={expanded}
+            onPress={handlePress}
+            style={styles.accordion} // Aplicando o estilo personalizado no Accordion
+            titleStyle={styles.accordionTitle} // Estilo do texto do título
+          >
+            {/* List.Items clicáveis, mas sem funcionalidade */}
+            <List.Item
+              title="Pitico"
+              style={styles.listItem} // Estilo aplicado aos itens da lista
+              titleStyle={styles.listItemTitle} // Estilo do título dentro do List.Item
+            />
+            <List.Item
+              title="Thor"
+              style={styles.listItem}
+              titleStyle={styles.listItemTitle}
+            />
+            <List.Item
+              title="Max"
+              style={styles.listItem}
+              titleStyle={styles.listItemTitle}
+            />
+          </List.Accordion>
+          
+          {/* Texto fora do Accordion, abaixo do título */}
+          {!expanded && (
+            <Text style={styles.instructionText}>
+              Selecione o cão desejado para medir a frequência cardíaca.
+            </Text>
+          )}
+        </List.Section>
+
+        {/* BPM e botão de instruções */}
         <View style={styles.container}>
-          <Text style={styles.equipmentText}>
-            Certifique-se de que o equipamento está devidamente equipado.
-          </Text>
 
           <View style={styles.bpmContainer}>
             <View style={styles.bpmContent}>
@@ -53,12 +95,21 @@ const MedidorRoute = () => {
             Instruções
           </Button>
         </View>
-        
+
+        {/* Modal de Instruções */}
         <Portal>
           <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalContainer}>
             <Text style={styles.modalTitle}>Instruções</Text>
             <Text style={styles.modalContent}>
-              Monitoramento: Acompanhe os dados de saúde cardíaca do seu cão diretamente no aplicativo.
+              1. Mantenha o cão calmo: Evite estresse e mantenha-o em um ambiente tranquilo.
+              {'\n\n'}
+              2. Entre em contato com o veterinário: Leve o cão à clínica o mais rápido possível.
+              {'\n\n'}
+              3. Monitore os sintomas: Colapso, dificuldade para respirar e batimentos irregulares são sinais graves.
+              {'\n\n'}
+              4. Evite RCP sem orientação: Só realize RCP com instrução veterinária, pois técnicas erradas podem prejudicar o cão.
+              {'\n\n\n'}
+              Essas dicas são baseadas em especialistas como Dr. Travis Arndt e Dr. Eric Van Nice, que reforçam a importância de agir rápido e manter o cão calmo até chegar à clínica.
             </Text>
             <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
               Voltar
@@ -75,30 +126,56 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
   },
-  cardContainer: {
-    position: 'relative',
+  headerBackground: {
+    padding: 10,
+    borderRadius: 10,
+    margin: 0,
+    justifyContent: 'flex-end',
+    height: 350,
+    marginTop: -200,
+  },
+  headerImage: {
+    borderRadius: 18,
   },
   overlay: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 10,
     left: 20,
-  },
-  selectText: {
-    color: '#FFFFFF',
-    fontSize: 14,
   },
   petName: {
     color: '#FFFFFF',
-    fontSize: 24,
+    fontSize: 34,
+    fontWeight: '400',
+  },
+
+  infoContainer: {
+    padding: 18,
+    backgroundColor: "#F4F4F4", // Cor mais escura que o branco
+    borderBottomLeftRadius: 18,  // Arredondado somente na parte inferior
+    borderBottomRightRadius: 18, // Arredondado somente na parte inferior
+    marginHorizontal: 2, // Diminui a margem lateral para deixar mais largo
+    marginVertical: 37,
+    marginTop: -0,
+    borderWidth: 1,  // Aumente o valor para tornar a borda mais espessa
+    borderColor: '#000',  // Cor preta para a borda (pode mudar a cor se necessário)
+  },
+  
+  petInfo: {
+    fontSize: 18,
+    color: '#000',
     fontWeight: 'bold',
+    marginBottom: 5,
+    textAlign: 'left',
+    paddingBottom: 10,
+  },
+  petDetails: {
+    fontSize: 16,
+    color: '#6D6D6D', // Cor suave para os detalhes
+    textAlign: 'left',
   },
   container: {
     paddingHorizontal: 24,
     backgroundColor: "#FFF",
-  },
-  img: {
-    height: 400,
-    marginTop: -120,
   },
   equipmentText: {
     fontSize: 22,
@@ -114,14 +191,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    borderWidth: 1,  // Aumente o valor para tornar a borda mais espessa
+    borderColor: '#000',  // Cor preta para a borda (pode mudar a cor se necessário)
   },
-  
   bpmContent: {
     alignItems: "flex-start",
   },
   bpmValue: {
     fontSize: 60,
-    fontWeight: "bold",
+    fontWeight: '450',
     color: "#1c1b1f",
   },
   bpmLabel: {
@@ -158,11 +236,6 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#B3261E',
     marginVertical: 24,
-    elevation: 0, // Remove a sombra no Android
-    shadowColor: 'transparent', // Remove a sombra no iOS
-    shadowOffset: { width: 0, height: 0 }, // Remove a sombra no iOS
-    shadowOpacity: 0, // Remove a sombra no iOS
-    shadowRadius: 0, // Remove a sombra no iOS
   },
   label: {
     color: '#ffffff',
@@ -187,6 +260,41 @@ const styles = StyleSheet.create({
     height: "auto",
     width: "auto",
     alignSelf: 'flex-end',
+  },
+  // Estilos do accordion
+  accordion: {
+    borderWidth: 1, // Borda mais espessa
+    borderColor: '#000', // Cor preta para o contorno
+    borderRadius: 26, // Bordas arredondadas
+    marginVertical: 10,
+    marginHorizontal: 22,
+    backgroundColor: '#F4F4F4', // Cor de fundo mais suave
+  },
+  accordionTitle: {
+    fontWeight: 'bold', // Negrito no texto do título
+    fontSize: 18,
+    color: '#1c1b1f',
+  },
+  // Estilo para o texto de instrução
+  instructionText: {
+    fontSize: 14,
+    color: "#6D6D6D",
+    textAlign: "center",
+    marginVertical: 5,
+    paddingHorizontal: 15,
+  },
+  // Estilos para os itens da lista
+  listItem: {
+    backgroundColor: "#FFF", // Cor de fundo dos itens da lista
+    borderBottomWidth: 1, // Linha de separação entre os itens
+    borderBottomColor: "#E0E0E0", // Cor da linha de separação
+    paddingVertical: 10, // Espaçamento vertical
+    paddingHorizontal: 15, // Espaçamento horizontal
+  },
+  listItemTitle: {
+    fontSize: 16, // Tamanho da fonte dos títulos
+    color: "#1c1b1f", // Cor do texto dos itens da lista
+    fontWeight: '500', // Peso da fonte dos títulos
   },
 });
 
