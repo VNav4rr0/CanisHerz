@@ -48,8 +48,8 @@ const MedidorRoute = () => {
 
         <View style={styles.infoContainer}>
           <Text style={styles.petInfo}>Informações do Cão</Text>
-          <Text style={styles.petDetails}>Peso: NA</Text>
-          <Text style={styles.petDetails}>Iades: NA</Text>
+          <Text style={styles.petDetails}>Peso: NO</Text>
+          <Text style={styles.petDetails}>Iades: NO</Text>
         </View>
 
         <List.Section>
@@ -80,6 +80,7 @@ const MedidorRoute = () => {
         <View style={styles.container}>
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
+            <Text style={styles.bpmLabel}>BPM</Text>
               <Text style={styles.bpmText}>60</Text>
               <View style={styles.iconC}>
                 <Icon
@@ -243,6 +244,14 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
   },
+  bpmLabel: {
+    fontSize: 17, // Tamanho do texto "BPM"
+    color: '#1C1B1F',
+    position: 'absolute',
+    top: -5, // Ajuste a posição vertical conforme necessário
+    left: 8, // Ajuste a posição horizontal conforme necessário
+  },
+  
   button: {
     backgroundColor: '#8B0000',
     marginBottom: 20,
