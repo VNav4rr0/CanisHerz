@@ -1,88 +1,97 @@
-import React, { useState } from "react";
-import { Text, StyleSheet, View, ScrollView, ImageBackground } from "react-native";
-import { Button, Icon, Modal, Portal, Provider, List } from 'react-native-paper';
+import React, { useState, useEffect } from "react";
+import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager } from "react-native";
+import { Button, Modal, Portal, Provider, List, Icon } from 'react-native-paper';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const MedidorRoute = () => {
   const [visible, setVisible] = useState(false);
-  const [expanded, setExpanded] = useState(false); // Para controlar o dropdown
+  const [expanded, setExpanded] = useState(false);
+  const [selectedDog, setSelectedDog] = useState(null);
+  const [dogs, setDogs] = useState([]);
+
+  const fetchDogs = async () => {
+    const fetchedDogs = ["Pitico", "Thor", "Max"];
+    setDogs(fetchedDogs);
+  };
+
+  useEffect(() => {
+    fetchDogs();
+  }, []);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
-  const handlePress = () => setExpanded(!expanded); // Função para alternar expandir/colapsar
+
+  const handlePress = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded(!expanded);
+  };
+
+  const selectDog = (dog) => {
+    setSelectedDog(dog);
+  };
 
   return (
-    <Provider>
-      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        {/* Cabeçalho com imagem de fundo e bordas arredondadas */}
+    <Provider contentContainerStyle={styles.scrollViewContainer}>
+      <ScrollView >
         <ImageBackground
           source={require('../assets/header.png')}
           style={styles.headerBackground}
           imageStyle={styles.headerImage}
         >
           <View style={styles.overlay}>
-            <Text style={styles.petName}>Pitico</Text>
+            <Text style={styles.petName}>{selectedDog ? selectedDog : "Selecione um cão"}</Text>
           </View>
         </ImageBackground>
 
-        {/* Informações fora do background */}
         <View style={styles.infoContainer}>
           <Text style={styles.petInfo}>Informações do Cão</Text>
-          <Text style={styles.petDetails}>Peso: 30kg</Text>
-          <Text style={styles.petDetails}>Idade: 1 ano</Text>
+          <Text style={styles.petDetails}>Peso: NA</Text>
+          <Text style={styles.petDetails}>Iades: NA</Text>
         </View>
 
-        {/* Seção de Cães cadastrados */}
         <List.Section>
           <List.Accordion
             title="Cães cadastrados"
             expanded={expanded}
             onPress={handlePress}
-            style={styles.accordion} // Aplicando o estilo personalizado no Accordion
-            titleStyle={styles.accordionTitle} // Estilo do texto do título
+            style={styles.customAccordion}
+            titleStyle={styles.accordionTitle}
+            description={selectedDog ? `Cão selecionado: ${selectedDog}` : "Selecione um cão para medir os batimentos"}
           >
-            {/* List.Items clicáveis, mas sem funcionalidade */}
-            <List.Item
-              title="Pitico"
-              style={styles.listItem} // Estilo aplicado aos itens da lista
-              titleStyle={styles.listItemTitle} // Estilo do título dentro do List.Item
-            />
-            <List.Item
-              title="Thor"
-              style={styles.listItem}
-              titleStyle={styles.listItemTitle}
-            />
-            <List.Item
-              title="Max"
-              style={styles.listItem}
-              titleStyle={styles.listItemTitle}
-            />
+            <View style={styles.accordionItemContainer} >
+              <ScrollView style={styles.accordionItemsScroll}>
+                {dogs.map((dog) => (
+
+                  <List.Item
+                    key={dog}
+                    title={dog}
+                    style={styles.accordionItem}
+                    onPress={() => selectDog(dog)}
+                  />
+                ))}
+              </ScrollView>
+            </View>
           </List.Accordion>
-          
-          {/* Texto fora do Accordion, abaixo do título */}
-          {!expanded && (
-            <Text style={styles.instructionText}>
-              Selecione o cão desejado para medir a frequência cardíaca.
-            </Text>
-          )}
         </List.Section>
 
-        {/* BPM e botão de instruções */}
         <View style={styles.container}>
-
           <View style={styles.bpmContainer}>
-            <View style={styles.bpmContent}>
-              <Text style={styles.bpmLabel}>BPM</Text>
-              <View style={styles.bpmRow}>
-                <Text style={styles.bpmValue}>60</Text>
-                <Icon source="heart" size={24} color="#B3261E" style={styles.heart} />
+            <View style={styles.heartContainer}>
+              <Text style={styles.bpmText}>60</Text>
+              <View style={styles.iconC}>
+                <Icon
+                  source="heart"
+                  size={24}
+                  color="#E81616"
+                  style={styles.heartIcon}
+                />
               </View>
+
             </View>
-            <View style={styles.statusContent}>
-              <View style={styles.statusRow}>
-                <Icon source="check" size={24} color="#000000" style={styles.checkIcon} />
-                <Text style={styles.statusText}>Normal</Text>
-              </View>
-            </View>
+              <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
           </View>
 
           <Button
@@ -96,7 +105,6 @@ const MedidorRoute = () => {
           </Button>
         </View>
 
-        {/* Modal de Instruções */}
         <Portal>
           <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalContainer}>
             <Text style={styles.modalTitle}>Instruções</Text>
@@ -108,12 +116,12 @@ const MedidorRoute = () => {
               3. Monitore os sintomas: Colapso, dificuldade para respirar e batimentos irregulares são sinais graves.
               {'\n\n'}
               4. Evite RCP sem orientação: Só realize RCP com instrução veterinária, pois técnicas erradas podem prejudicar o cão.
-              {'\n\n\n'}
-              Essas dicas são baseadas em especialistas como Dr. Travis Arndt e Dr. Eric Van Nice, que reforçam a importância de agir rápido e manter o cão calmo até chegar à clínica.
             </Text>
+            <View style={styles.modalButtonContainer}>  
             <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
               Voltar
             </Button>
+            </View>
           </Modal>
         </Portal>
       </ScrollView>
@@ -124,179 +132,146 @@ const MedidorRoute = () => {
 const styles = StyleSheet.create({
   scrollViewContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    paddingBottom: 50,
   },
   headerBackground: {
-    padding: 10,
-    borderRadius: 10,
-    margin: 0,
-    justifyContent: 'flex-end',
-    height: 350,
-    marginTop: -200,
-  },
-  headerImage: {
-    borderRadius: 18,
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 10,
-    left: 20,
-  },
-  petName: {
-    color: '#FFFFFF',
-    fontSize: 34,
-    fontWeight: '400',
-  },
-
-   infoContainer: {
-    top: 19,
-    padding: 18,
-    backgroundColor: "#F4F4F4",
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
-    marginHorizontal: 1,
-    marginVertical: 37,
-    marginTop: -20, // Reduzindo para aproximar do nome
-    borderWidth: 1,
-    borderColor: '#000',
+    width: '100%',
+    height: 250,
+    overflow: 'hidden',
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
     
   },
-  
-  petInfo: {
-    fontSize: 18,
-    color: '#000',
+  headerImage: {
+    resizeMode: 'cover',
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(139, 0, 0, 0.6)',
+    padding: 20,
+  },
+  petName: {
+    fontSize: 40,
     fontWeight: 'bold',
-    marginBottom: 5,
-    textAlign: 'left',
-    paddingBottom: 10,
+    color: '#fff',
+  },
+  infoContainer: {
+    padding: 20,
+  },
+  petInfo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   petDetails: {
     fontSize: 16,
-    color: '#6D6D6D', // Cor suave para os detalhes
-    textAlign: 'left',
+    color: '#555',
+  },
+  customAccordion: {
+    backgroundColor: '#FFF8F7',
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#808080',
+    
+  },
+  accordionTitle: {
+    fontSize: 18,
+    color: '#232323',
+    fontWeight: 'bold',
+  },
+  accordionItemsScroll: {
+    maxHeight: 150,  // Limita a altura do scroll
+  },
+  accordionItemContainer: {
+    overflow: 'hidden',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#808080',
+    width: 'auto',
+    marginHorizontal: 20,
+  },
+  accordionItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#808080',
+    backgroundColor: '#FFF8F7',
+
   },
   container: {
-    paddingHorizontal: 24,
-    backgroundColor: "#FFF",
-  },
-  equipmentText: {
-    fontSize: 22,
-    color: "#1c1b1f",
-    textAlign: "center",
-    marginVertical: 30,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   bpmContainer: {
-    backgroundColor: "#F4F4F4",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    position: 'relative',
+    backgroundColor: '#FFF8F7',
+    padding: 20,
     borderRadius: 20,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderWidth: 1,  // Aumente o valor para tornar a borda mais espessa
-    borderColor: '#000',  // Cor preta para a borda (pode mudar a cor se necessário)
+    borderWidth: 1,
+    borderColor: '#808080',
   },
-  bpmContent: {
-    alignItems: "flex-start",
+  resultado: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    margin: 16,
   },
-  bpmValue: {
-    fontSize: 60,
-    fontWeight: '450',
-    color: "#1c1b1f",
-  },
-  bpmLabel: {
-    fontSize: 18,
-    color: "#1c1b1f",
-    marginTop: -10,
-  },
-  bpmRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  heart: {
-    marginLeft: 8,
-    position: "relative",
-    top: -20,
-  },
-  statusContent: {
-    position: "relative",
-    height: "100%",
-  },
-  statusRow: {
+  heartContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+
   },
-  statusText: {
-    fontSize: 16,
-    color: "#1c1b1f",
-    fontWeight: "500",
-    marginLeft: 8,
+  bpmText: {
+    fontSize: 64,
+    fontWeight: 'bold',
+    color: '#1C1B1F',
   },
-  checkIcon: {
-    marginRight: 8,
+  iconC: {
+    display: 'flex',
+    justifyContent: 'start',
+    height: 50,
+  },
+  heartIcon: {
+    marginLeft: 10,
+    position: 'absolute',
+    top: 0,
+    left: 0,
   },
   button: {
-    backgroundColor: '#B3261E',
-    marginVertical: 24,
+    backgroundColor: '#8B0000',
+    marginBottom: 20,
   },
   label: {
-    color: '#ffffff',
+    color: '#fff',
   },
   modalContainer: {
-    backgroundColor: 'white',
     padding: 20,
-    margin: 20,
-    borderRadius: 8,
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    borderRadius: 10,
   },
   modalTitle: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   modalContent: {
     fontSize: 16,
     marginBottom: 20,
   },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
   closeButton: {
-    backgroundColor: '#B3261E',
-    height: "auto",
-    width: "auto",
-    alignSelf: 'flex-end',
-  },
-  // Estilos do accordion
-  accordion: {
-    borderWidth: 1, // Borda mais espessa
-    borderColor: '#000', // Cor preta para o contorno
-    borderRadius: 26, // Bordas arredondadas
-    marginVertical: 10,
-    marginHorizontal: 22,
-    backgroundColor: '#F4F4F4', // Cor de fundo mais suave
-  },
-  accordionTitle: {
-    fontWeight: 'bold', // Negrito no texto do título
-    fontSize: 18,
-    color: '#1c1b1f',
-  },
-  // Estilo para o texto de instrução
-  instructionText: {
-    fontSize: 14,
-    color: "#6D6D6D",
-    textAlign: "center",
-    marginVertical: 5,
-    paddingHorizontal: 15,
-  },
-  // Estilos para os itens da lista
-  listItem: {
-    backgroundColor: "#FFF", // Cor de fundo dos itens da lista
-    borderBottomWidth: 1, // Linha de separação entre os itens
-    borderBottomColor: "#E0E0E0", // Cor da linha de separação
-    paddingVertical: 10, // Espaçamento vertical
-    paddingHorizontal: 15, // Espaçamento horizontal
-  },
-  listItemTitle: {
-    fontSize: 16, // Tamanho da fonte dos títulos
-    color: "#1c1b1f", // Cor do texto dos itens da lista
-    fontWeight: '500', // Peso da fonte dos títulos
+    backgroundColor: '#8B0000',
+    width: 'auto',
   },
 });
 

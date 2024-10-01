@@ -49,57 +49,50 @@ export default function Formulario() {
 
   return (
     <Provider>
-      <ImageBackground source={require('../assets/noisy-gradients.png')} style={styles.container}>
+      <ImageBackground source={require('../assets/patas.png')} style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Text style={styles.title}>
-            Para começar, solicitamos que você registre seu cachorro.
-          </Text>
-
-          <View style={styles.imageContainer}>
-            <View style={styles.Group}>
-              <Image
-                source={{ uri: 'https://i.em.com.br/pw8wAb1iL90zzVONgmDfc238QDM=/1200x1200/smart/imgsapp.em.com.br/app/noticia_127983242361/2023/10/04/1571459/rodrigo-goes_1_1286476.png' }} // Substitua pelo link real da imagem
-                style={styles.image}
+            Em seguida, solicitamos que você registre seu cachorro.          </Text>
+          <View>
+            <TextInput
+              label="Apelido"
+              value={nickname}
+              onChangeText={setNickname}
+              style={styles.input}
+            />
+            <View style={styles.row}>
+              <TextInput
+                label="Data de Nascimento"
+                value={birthDate}
+                onChangeText={text => setBirthDate(text)}
+                style={[styles.input, styles.halfInput]}
               />
-              <IconButton icon="plus" mode="contained-tonal" style={styles.cameraButton} iconColor='#fff' />
+              <TextInput
+                label="Peso"
+                value={weight}
+                onChangeText={text => setWeight(text)}
+                style={[styles.input, styles.halfInput, styles.peso]}
+              />
             </View>
-          </View>
-          <TextInput
-            label="Apelido"
-            value={nickname}
-            onChangeText={setNickname}
-            style={styles.input}
-          />
-          <View style={styles.row}>
-            <TextInput
-              label="Data de Nascimento"
-              value={birthDate}
-              onChangeText={text => setBirthDate(text)}
-              style={[styles.input, styles.halfInput]}
-            />
-            <TextInput
-              label="Peso"
-              value={weight}
-              onChangeText={text => setWeight(text)}
-              style={[styles.input, styles.halfInput, styles.peso]}
-            />
-          </View>
-          <View style={styles.pickerContainer}>
-            <Text style={styles.pickerLabel}>Porte</Text>
-            <Picker
-              selectedValue={size}
-              onValueChange={(itemValue) => setSize(itemValue)}
-              style={styles.picker}
-              mode="dialog"
-            >
-              <Picker.Item label="Pequeno" value="Pequeno" />
-              <Picker.Item label="Médio" value="Médio" />
-              <Picker.Item label="Grande" value="Grande" />
-            </Picker>
-          </View>
-          <Button mode='text' labelStyle={{ color: '#fff' }} onPress={showModal}>Por que usar essas informações?</Button>
-          <Button mode="contained" style={styles.button} labelStyle={{ color: '#1E1E1E' }} onPress={handleSubmit}>Finalizar</Button>
+            <View style={styles.pickerContainer}>
+              <Text style={styles.pickerLabel}>Porte</Text>
+              <Picker
+                selectedValue={size}
+                onValueChange={(itemValue) => setSize(itemValue)}
+                style={styles.picker}
+                mode="dialog"
+              >
+                <Picker.Item label="Pequeno" value="Pequeno" />
+                <Picker.Item label="Médio" value="Médio" />
+                <Picker.Item label="Grande" value="Grande" />
+              </Picker>
+            </View>
+            <Button mode='text' labelStyle={{ color: '#fff' }} onPress={showModal}>Por que usar essas informações?</Button>
 
+          </View>
+          <View>
+            <Button mode="contained" style={styles.button} labelStyle={{ color: '#1E1E1E' }} onPress={handleSubmit}>Finalizar</Button>
+          </View>
           <Portal>
             {visible && (
               <TouchableWithoutFeedback onPress={hideModal}>
@@ -135,12 +128,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
   },
   scrollContent: {
     padding: 16,
+    paddingTop: 64,
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   modalView: {
     margin: 20,
@@ -160,7 +153,6 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
     color: '#FFF',
-    marginBottom: 24,
     fontFamily: 'Poppins_700Bold',
   },
   imageContainer: {

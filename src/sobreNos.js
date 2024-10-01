@@ -11,23 +11,21 @@ export default function SobreNos() {
     };
 
     return (
-        <ImageBackground source={require('../assets/sobre.png')} style={styles.backgroundImage}>
+        <ImageBackground source={require('../assets/caoBack.png')} style={styles.backgroundImage}>
             <View style={styles.container}>
-                <IconButton
-                    icon="arrow-left"
-                    onPress={handleGoBack}
-                    iconColor="#FFF"
-                    style={styles.backButton}
-                />
-
-                    <View style={styles.textContainer}>
-                        <Text style={styles.title}>Conheça quem somos</Text>
-                        <Text style={styles.description}>
-                            Mussum Ipsum, cacilds vidis litro abertis. Morbi viverra placerat justo, vel pharetra turpis.
-                            Tá deprimidis, eu conheço uma cachacis que pode alegrar sua vidis. Em pé sem cair, deitado sem dormir,
-                            sentado sem cochilar e fazendo pose. Delegadis gente finis, bibendum egestas augue arcu ut est.
-                        </Text>
-                    </View>
+                <View style={styles.textContainer}>
+                    <IconButton
+                        icon="arrow-left"
+                        onPress={handleGoBack}
+                        size={24}
+                        iconColor="#232323"
+                        style={styles.backButton}
+                    />
+                    <Text style={styles.title}>Conheça quem somos</Text>
+                    <Text style={styles.description}>
+                        CanisHerz é um sistema voltado para ao acompanhamento cadíaco do seu cachorro, permitindo um método melhor de avaliação sobre a saúde seu querido pet.
+                    </Text>
+                </View>
             </View>
         </ImageBackground>
     );
@@ -41,32 +39,32 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'flex-end',
-        paddingHorizontal: 24,
-        paddingVertical: 48,
     },
     backButton: {
-        position: 'absolute',
-        marginVertical: 50,
-        marginHorizontal: 24,
-        top: 10,
-        left: 10,
+        backgroundColor: '#FFF8F7',
+        marginBottom: 20,
+        display: 'flex',
+        justifyContent: 'flex-start',
     },
     textContainer: {
-        justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.3)', // Fundo semi-transparente para o texto
+        width: '100%',
+        height: '60%',
+        backgroundColor: '#FFF8F7',
         padding: 20,
-        borderRadius: 10,
+        borderTopEndRadius: 32,
+        borderTopStartRadius: 32,
+
     },
     title: {
-        fontSize: 32,
+        fontSize: 42,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#232323',
         marginBottom: 20,
     },
     description: {
-        fontSize: 16,
-        color: '#FFF',
-        lineHeight: 24,
+        fontSize: 24,
+        color: '#232323',
+        lineHeight: 36,
     },
     absolute: {
         position: 'absolute',

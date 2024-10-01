@@ -18,7 +18,7 @@ const Carregamento1 = ({ nickname, onTransitionEnd }) => {
 
   return (
     <Animated.View style={[styles.container, { opacity }]}>
-      <ImageBackground style={styles.imageBackground} source={require('../assets/noisy-gradients.png')}>
+      <ImageBackground style={styles.imageBackground} source={require('../assets/patas.png')}>
         <Image source={require('../assets/logo1.png')} style={styles.logo} />
         <Text style={styles.text}>Bem-vindo!</Text>
         <Text style={styles.nome}>{nickname}</Text>

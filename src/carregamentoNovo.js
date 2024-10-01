@@ -14,7 +14,7 @@ const CarregamentoNovo = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={require('../assets/noisy-gradients.png')} style={styles.container}>
+      <ImageBackground source={require('../assets/patas.png')} style={styles.container}>
         <Image source={require('../assets/logo1.png')} style={styles.icon} />
         <Text style={styles.bemvindo}>Bem-Vindo</Text>
         <Text style={styles.text}>
