@@ -48,8 +48,8 @@ const MedidorRoute = () => {
 
         <View style={styles.infoContainer}>
           <Text style={styles.petInfo}>Informações do Cão</Text>
-          <Text style={styles.petDetails}>Peso: NO</Text>
-          <Text style={styles.petDetails}>Iades: NO</Text>
+          <Text style={styles.petDetails}>Peso: NA</Text>
+          <Text style={styles.petDetails}>Iades: NA</Text>
         </View>
 
         <List.Section>
