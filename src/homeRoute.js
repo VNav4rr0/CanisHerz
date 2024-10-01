@@ -8,7 +8,7 @@ const HomeRoute = () => (
     <View style={styles.container}>
       <View style={styles.row}>
         <View style={styles.column2}>
-          <Card mode='contained' style={[styles.card, { height: 140, backgroundColor: '#f5f5f5' }]}>
+          <Card mode='outlined' style={[styles.card, { height: 140, backgroundColor: '#f5f5f5' }]}>
             <Card.Title
               title="Dispositivo"
               right={(props) => <IconButton {...props} icon="access-point-off" size={24} />}
@@ -20,8 +20,8 @@ const HomeRoute = () => (
           <Button buttonColor="#BE0C12" mode="contained">Contained</Button>
         </View>
         <View style={styles.column}>
-          <Card mode='contained' style={[styles.card, { backgroundColor: '#f5f5f5' }]}>
-            <Card.Content style={styles.cont}>
+          <Card mode='outlined' style={[styles.cont, { backgroundColor: '#f5f5f5' }]}>
+            <Card.Content style={styles.conteu}>
               <Icon
                 source="battery-off-outline"
                 size={48}
@@ -30,7 +30,7 @@ const HomeRoute = () => (
           </Card>
         </View>
       </View>
-      <Card mode='contained' style={[styles.card, { width:"100", backgroundColor: '#f5f5f5' }]}>
+      <Card mode='outlined' style={[styles.card, { width:"100", backgroundColor: '#f5f5f5' }]}>
             <Card.Title
               title="Aviso"
             />
@@ -60,11 +60,17 @@ const styles = StyleSheet.create({
     height: 200,
     width: '100%',
   },
+
   cont: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100%',
+    width: 'auto',
+    padding: 0,
+  },
+  conteu:{
+    width:'100%',
   },
   column: {
     flex: 1,

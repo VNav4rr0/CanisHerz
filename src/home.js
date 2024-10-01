@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BottomNavigation } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // Importar as rotas
 import HomeRoute from './homeRoute'; // Corrija o caminho se necessário
@@ -29,7 +28,7 @@ export default function Home() {
       onIndexChange={setIndex}
       renderScene={renderScene}
       barStyle={styles.navBar}
-      activeColor="#000" // Cor dos ícones selecionados
+      activeColor="#232323" // Cor dos ícones selecionados
       inactiveColor="#757575" // Cor dos ícones não selecionados
     />
   );
