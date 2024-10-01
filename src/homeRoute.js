@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: '100%',
     width: 'auto',
-    padding: 0,
+    
   },
   conteu:{
     width:'100%',
