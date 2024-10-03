@@ -87,8 +87,39 @@ const perfilRoute = () => {
         <View style={styles.container}>
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}><Icon source="hand-peace-variant" size={16} style={styles.likeIcon} />Segunda</Text>
-            <Text style={styles.bpmText}>60 BPM</Text>
+            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={24} style={styles.likeIcon} /> Segunda</Text>
+            <Text style={styles.bpmText}>100 BPM</Text>
+        
+              <View style={styles.iconC}>
+              </View>
+            </View>
+          <Text style={styles.resultado}> Normal </Text>
+          </View>
+        </View>
+
+
+        
+        <View style={styles.container}>
+          <View style={styles.bpmContainer}>
+            <View style={styles.heartContainer}>
+            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={24} style={styles.likeIcon} /> Segunda</Text>
+            <Text style={styles.bpmText}>100 BPM</Text>
+        
+              <View style={styles.iconC}>
+                
+              </View>
+            </View>
+          <Text style={styles.resultado}> Normal </Text>
+          </View>
+        </View>
+
+
+        
+        <View style={styles.container}>
+          <View style={styles.bpmContainer}>
+            <View style={styles.heartContainer}>
+            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={24} style={styles.likeIcon} /> Segunda</Text>
+            <Text style={styles.bpmText}>100 BPM</Text>
         
               <View style={styles.iconC}>
                 
@@ -206,7 +237,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     position: 'relative',
     backgroundColor: '#FFF8F7',
-    padding: 20,
+    padding: 10,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#808080',
@@ -247,7 +278,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -5, // Ajuste a posição vertical conforme necessário
     left: 8, // Ajuste a posição horizontal conforme necessário
+    paddingLeft: -10, // Adiciona espaço entre o ícone e o texto "Segunda"
   },
+  
   
   button: {
     backgroundColor: '#8B0000',
