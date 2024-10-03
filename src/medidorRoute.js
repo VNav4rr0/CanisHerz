@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     
+    
   },
   headerImage: {
     resizeMode: 'cover',
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
   },
   
   button: {
-    backgroundColor: '#8B0000',
+    backgroundColor: '#BE0C12',
     marginBottom: 20,
   },
   label: {
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   closeButton: {
-    backgroundColor: '#8B0000',
+    backgroundColor: '#BE0C12',
     width: 'auto',
   },
 });
