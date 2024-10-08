@@ -5,9 +5,7 @@ import { Button, Provider, Icon, Card, IconButton } from 'react-native-paper';
 const HomeRoute = () => (
   <Provider>
     <ImageBackground style={[styles.capa, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }]} source={require('../assets/capa3.png')} >
-      <view>
-        
-      </view>
+     
       <Image style={styles.dog} source={require('../assets/unsplash_WX4i1Jq_o0Y.png')} />
     </ImageBackground>
     <View style={styles.container}>
