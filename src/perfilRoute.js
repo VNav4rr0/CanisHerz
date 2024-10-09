@@ -94,7 +94,7 @@ const perfilRoute = () => {
               <View style={styles.iconC}>
               </View>
             </View>
-          <Text style={styles.resultado}> Normal </Text>
+            <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
           </View>
         </View>
 
@@ -108,7 +108,7 @@ const perfilRoute = () => {
               <View style={styles.iconC}>
               </View>
             </View>
-          <Text style={styles.resultado}> Normal </Text>
+            <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
           </View>
         </View>
 
@@ -122,7 +122,7 @@ const perfilRoute = () => {
               <View style={styles.iconC}>
               </View>
             </View>
-          <Text style={styles.resultado}> Normal </Text>
+            <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
           </View>
         </View>
 

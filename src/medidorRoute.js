@@ -231,7 +231,6 @@ const styles = StyleSheet.create({
   },
   bpmText: {
     fontSize: 64,
-    fontWeight: 'bold',
     color: '#1C1B1F',
   },
   iconC: {
