@@ -112,8 +112,19 @@ const perfilRoute = () => {
           </View>
         </View>
 
-           
         
+        <View style={styles.container}>
+          <View style={styles.bpmContainer}>
+            <View style={styles.heartContainer}>
+            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
+            <Text style={styles.bpmText}>100 BPM</Text>
+              <View style={styles.iconC}>
+              </View>
+            </View>
+            <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
+          </View>
+        </View>
+
         <View style={styles.container}>
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
@@ -143,7 +154,7 @@ const styles = StyleSheet.create({
     fontSize: 38,
     fontWeight: 'bold',
     color: '#232323',
-    marginBottom: 2,
+    marginBottom: 19,
   },
 
   header: {
@@ -229,7 +240,7 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 1,
   },
   bpmContainer: {
     flexDirection: 'row',
