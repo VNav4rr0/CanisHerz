@@ -42,13 +42,13 @@ const perfilRoute = () => {
           style={styles.headerBackground}
           imageStyle={styles.headerImage}
         >
-
+          <View style={styles.overlay}>
           <Appbar.Header style={styles.header}>
             <Appbar.Content />
             <Appbar.Action icon="plus" onPress={() => {}} color="#fff" />
             <Appbar.Action style={styles.btn} mode="contained"icon="pencil" onPress={() => {}}  color="#fff" />
         </Appbar.Header>
-          <View style={styles.overlay}>
+
             <Text style={styles.petName}>João Mendes</Text>
           </View>
         </ImageBackground>
@@ -89,7 +89,7 @@ const perfilRoute = () => {
         <View style={styles.container}>
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={22} style={styles.likeIcon} /> Segunda</Text>
+            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
             <Text style={styles.bpmText}>100 BPM</Text>
               <View style={styles.iconC}>
               </View>
@@ -103,7 +103,7 @@ const perfilRoute = () => {
         <View style={styles.container}>
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={22} style={styles.likeIcon} /> Segunda</Text>
+            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
             <Text style={styles.bpmText}>100 BPM</Text>
               <View style={styles.iconC}>
               </View>
@@ -117,7 +117,7 @@ const perfilRoute = () => {
         <View style={styles.container}>
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={22} style={styles.likeIcon} /> Segunda</Text>
+            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
             <Text style={styles.bpmText}>100 BPM</Text>
               <View style={styles.iconC}>
               </View>
@@ -143,15 +143,15 @@ const styles = StyleSheet.create({
     fontSize: 38,
     fontWeight: 'bold',
     color: '#232323',
-    marginBottom: 10,
+    marginBottom: 2,
   },
 
   header: {
     backgroundColor: 'rgba(0, 0, 0, 0)', // Transparente
-   
+    marginHorizontal: 300,
     borderBottomWidth: 0, // Remove a linha inferior
     paddingBottom: 0, // Remove o padding inferior
-    marginBottom: 0, // Remove o margin inferior
+    marginBottom: 89, // Remove o margin inferior
 },
   scrollViewContainer: {
     flexGrow: 1,
@@ -256,8 +256,8 @@ const styles = StyleSheet.create({
   },
   bpmText: {
     paddingHorizontal: 10,
-    paddingVertical: 20,
-    fontSize: 34,
+    paddingVertical: 19,
+    fontSize: 24,
     color: '#1C1B1F',
   },
   iconC: {
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
 },
 
   bpmLabel: {
-    fontSize: 14, // Tamanho do texto "BPM"
+    fontSize: 15, // Tamanho do texto "BPM"
     color: '#1C1B1F',
     position: 'absolute',
     top: -5, // Ajuste a posição vertical conforme necessário
