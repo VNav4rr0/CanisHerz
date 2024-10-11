@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     fontSize: 38,
     fontWeight: 'bold',
     color: '#232323',
-    marginBottom: 10,
+    marginBottom: 2,
   },
 
   header: {
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
 },
 
   bpmLabel: {
-    fontSize: 14, // Tamanho do texto "BPM"
+    fontSize: 15, // Tamanho do texto "BPM"
     color: '#1C1B1F',
     position: 'absolute',
     top: -5, // Ajuste a posição vertical conforme necessário
