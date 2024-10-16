@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View, ScrollView, Text, ImageBackground } from 'react-native';
-import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { Provider as PaperProvider, Button as PaperButton } from 'react-native-paper';
+import { Provider as PaperProvider, Button as PaperButton,  } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -9,23 +8,8 @@ import * as SplashScreen from 'expo-splash-screen';
 SplashScreen.preventAutoHideAsync();
 
 export default function Boasvindas() {
-  const [fontsLoaded] = useFonts({
-    Poppins_400Regular,
-    Poppins_700Bold,
-  });
 
   const navigation = useNavigation();
-
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   const handlePressFormulario = () => {
     navigation.navigate('Formulario');
   };

@@ -8,7 +8,7 @@ import SobreNos from './src/sobreNos';
 import Formulario from './src/formulario';
 import CarregamentoNovo from './src/carregamentoNovo';
 import Home from './src/home';
-
+import AddNovosDogs from './src/addNovosDogs';
 
 const Stack = createNativeStackNavigator();
 
@@ -48,6 +48,7 @@ export default function App() {
           <Stack.Screen name="SobreNos" component={SobreNos} />
           <Stack.Screen name="CarregamentoNovo" component={CarregamentoNovo} />
           <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="AddNovosDogs" component={AddNovosDogs} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

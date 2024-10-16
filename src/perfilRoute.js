@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager } from "react-native";
-import { Provider, List, Icon, Appbar, } from 'react-native-paper';
+import { Provider, List, Icon, Appbar } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native'; // Importação do hook useNavigation
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const perfilRoute = () => {
+const PerfilRoute = () => { // Nome do componente deve começar com letra maiúscula
+  const navigation = useNavigation(); // Inicializando o hook de navegação
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [selectedDog, setSelectedDog] = useState(null);
@@ -33,27 +35,30 @@ const perfilRoute = () => {
     setSelectedDog(dog);
   };
 
+  const handlePressAddNovosDogs = () => {
+    navigation.navigate('AddNovosDogs');
+  };
+
   const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
+  
   return (
-    <Provider contentContainerStyle={styles.scrollViewContainer}>
-      <ScrollView >
+    <Provider>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         <ImageBackground
           source={require('../assets/header.png')}
           style={styles.headerBackground}
           imageStyle={styles.headerImage}
         >
           <View style={styles.overlay}>
-          <Appbar.Header style={styles.header}>
-            <Appbar.Content />
-            <Appbar.Action icon="plus" onPress={() => {}} color="#fff" />
-            <Appbar.Action style={styles.btn} mode="contained"icon="pencil" onPress={() => {}}  color="#fff" />
-        </Appbar.Header>
+            <Appbar.Header style={styles.header}>
+              <Appbar.Content />
+              <Appbar.Action icon="plus" onPress={handlePressAddNovosDogs} color="#fff" />
+              <Appbar.Action style={styles.btn} mode="contained" icon="pencil" onPress={() => {}} color="#fff" />
+            </Appbar.Header>
 
             <Text style={styles.petName}>João Mendes</Text>
           </View>
         </ImageBackground>
-
-  
 
         <List.Section>
           <List.Accordion
@@ -64,10 +69,9 @@ const perfilRoute = () => {
             titleStyle={styles.accordionTitle}
             description={selectedDog ? `Cão selecionado: ${selectedDog}` : "Selecione um cão para medir os batimentos"}
           >
-            <View style={styles.accordionItemContainer} >
+            <View style={styles.accordionItemContainer}>
               <ScrollView style={styles.accordionItemsScroll}>
                 {dogs.map((dog) => (
-
                   <List.Item
                     key={dog}
                     title={dog}
@@ -81,63 +85,21 @@ const perfilRoute = () => {
         </List.Section>
 
         <View style={styles.cardioSection}>
-  <Text style={styles.cardioTitle}>Dados Cardíacos</Text>
-</View>
-
-
-
-        <View style={styles.container}>
-          <View style={styles.bpmContainer}>
-            <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
-            <Text style={styles.bpmText}>100 BPM</Text>
-              <View style={styles.iconC}>
-              </View>
-            </View>
-            <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
-          </View>
+          <Text style={styles.cardioTitle}>Dados Cardíacos</Text>
         </View>
 
-          
-        
-        <View style={styles.container}>
-          <View style={styles.bpmContainer}>
-            <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
-            <Text style={styles.bpmText}>100 BPM</Text>
-              <View style={styles.iconC}>
+        {/* Dados Cardíacos */}
+        {Array(4).fill().map((_, index) => ( // Gera 4 seções de dados cardíacos
+          <View key={index} style={styles.container}>
+            <View style={styles.bpmContainer}>
+              <View style={styles.heartContainer}>
+                <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
+                <Text style={styles.bpmText}>100 BPM</Text>
               </View>
+              <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
             </View>
-            <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
           </View>
-        </View>
-
-        
-        <View style={styles.container}>
-          <View style={styles.bpmContainer}>
-            <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
-            <Text style={styles.bpmText}>100 BPM</Text>
-              <View style={styles.iconC}>
-              </View>
-            </View>
-            <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
-          </View>
-        </View>
-
-        <View style={styles.container}>
-          <View style={styles.bpmContainer}>
-            <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
-            <Text style={styles.bpmText}>100 BPM</Text>
-              <View style={styles.iconC}>
-              </View>
-            </View>
-            <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
-          </View>
-        </View>
-
-      
+        ))}
 
       </ScrollView>
     </Provider>
@@ -145,7 +107,6 @@ const perfilRoute = () => {
 };
 
 const styles = StyleSheet.create({
-
   cardioSection: {
     paddingHorizontal: 25,
     paddingVertical: 10,
@@ -156,29 +117,26 @@ const styles = StyleSheet.create({
     color: '#232323',
     marginBottom: 19,
   },
-
   header: {
     backgroundColor: 'rgba(0, 0, 0, 0)', // Transparente
-    marginHorizontal: 300,
+    width: '100%',
     borderBottomWidth: 0, // Remove a linha inferior
     paddingBottom: 0, // Remove o padding inferior
     marginBottom: 89, // Remove o margin inferior
-},
+  },
   scrollViewContainer: {
     flexGrow: 1,
     paddingBottom: 50,
   },
   headerBackground: {
-    
     width: '100%',
     height: 250,
     overflow: 'hidden',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
-    
   },
-  btn:{
-    backgroundColor:"#E81616",
+  btn: {
+    backgroundColor: "#E81616",
   },
   headerImage: {
     resizeMode: 'cover',
@@ -195,18 +153,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  infoContainer: {
-    padding: 20,
-  },
-  petInfo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  petDetails: {
-    fontSize: 16,
-    color: '#555',
-  },
   customAccordion: {
     backgroundColor: '#FFF8F7',
     marginHorizontal: 20,
@@ -214,7 +160,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#808080',
-    
   },
   accordionTitle: {
     fontSize: 18,
@@ -236,7 +181,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#808080',
     backgroundColor: '#FFF8F7',
-
   },
   container: {
     paddingHorizontal: 20,
@@ -263,18 +207,13 @@ const styles = StyleSheet.create({
   heartContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-
+    marginTop: 16,
   },
   bpmText: {
     paddingHorizontal: 10,
     paddingVertical: 19,
     fontSize: 24,
     color: '#1C1B1F',
-  },
-  iconC: {
-    display: 'flex',
-    justifyContent: 'start',
-    height: 20,
   },
   likeIcon: {
     fontSize: 24, // Altere o tamanho conforme necessário
@@ -283,8 +222,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-},
-
+  },
   bpmLabel: {
     fontSize: 15, // Tamanho do texto "BPM"
     color: '#1C1B1F',
@@ -293,38 +231,6 @@ const styles = StyleSheet.create({
     left: 8, // Ajuste a posição horizontal conforme necessário
     paddingLeft: -10, // Adiciona espaço entre o ícone e o texto "Segunda"
   },
-  
-  
-  button: {
-    backgroundColor: '#8B0000',
-    marginBottom: 20,
-  },
-  label: {
-    color: '#fff',
-  },
-  modalContainer: {
-    padding: 20,
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    borderRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  modalContent: {
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  closeButton: {
-    backgroundColor: '#8B0000',
-    width: 'auto',
-  },
 });
 
-export default perfilRoute;
+export default PerfilRoute; // A exportação deve corresponder ao nome do componente

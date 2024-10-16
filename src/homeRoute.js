@@ -3,27 +3,57 @@ import { View, Text, StyleSheet, Image, ImageBackground } from 'react-native';
 import { Button, Provider, IconButton, Card, Icon } from 'react-native-paper';
 
 const HomeRoute = () => {
-  const [batteryPercentage, setBatteryPercentage] = useState(90); // Initial battery percentage
+  const [batteryPercentage, setBatteryPercentage] = useState(100); // Initial battery percentage
 
   // Function to deduct battery percentage
   const reduceBattery = (amount) => {
     setBatteryPercentage((prev) => Math.max(prev - amount, 0)); // Reduce battery but not below 0
   };
 
-  // Function to get the icon based on battery percentage
-  const getBatteryIcon = () => {
-    if (batteryPercentage > 100) return "battery"; // High battery
-    if (batteryPercentage > 90) return "battery-90"; // High battery
-    if (batteryPercentage > 80) return "battery-80"; // High battery
-    if (batteryPercentage > 70) return "battery-70"; // High battery
-    if (batteryPercentage > 60) return "battery-60"; // High battery
-    if (batteryPercentage > 50) return "battery-50"; // High battery
-    if (batteryPercentage > 40) return "battery-40"; // High battery
-    if (batteryPercentage > 30) return "battery-30"; 
-    if (batteryPercentage > 20) return "battery-20"; 
-    if (batteryPercentage > 10) return "battery-10"; // Low battery
-    return "battery-alert"; // Critical battery
+  // Function to get the icon and color based on battery percentage
+  const getBatteryIconAndColor = () => {
+    let icon = "";
+    let color = "";
+
+    if (batteryPercentage > 100) {
+      icon = "battery";
+      color = "#009951"; // Verde
+    } else if (batteryPercentage > 90) {
+      icon = "battery";
+      color = "#009951"; // Verde
+    } else if (batteryPercentage > 80) {
+      icon = "battery-80";
+      color = "#009951"; // Verde
+    } else if (batteryPercentage > 70) {
+      icon = "battery-70";
+      color = "#009951"; // Amarelo-Verde
+    } else if (batteryPercentage > 60) {
+      icon = "battery-60";
+      color = "#009951"; // Amarelo-Verde
+    } else if (batteryPercentage > 50) {
+      icon = "battery-50";
+      color = "#009951"; // Amarelo
+    } else if (batteryPercentage > 40) {
+      icon = "battery-40";
+      color = "#009951"; // Amarelo
+    } else if (batteryPercentage > 30) {
+      icon = "battery-30";
+      color = "#009951"; // Laranja
+    } else if (batteryPercentage > 20) {
+      icon = "battery-20";
+      color = "#009951"; // Laranja
+    } else if (batteryPercentage > 10) {
+      icon = "battery-10";
+      color = "#E8B931"; // Vermelho
+    } else {
+      icon = "battery-alert";
+      color = "#E8B931"; // Vermelho Crítico
+    }
+
+    return { icon, color };
   };
+
+  const { icon, color } = getBatteryIconAndColor();
 
   return (
     <Provider>
@@ -56,7 +86,7 @@ const HomeRoute = () => {
             <Card mode='outlined' style={[styles.cont, { backgroundColor: '#FFF8F7', width: '100%', borderRadius: 32 }]}>
               <Card.Content style={styles.conteu}>
                 <Text style={styles.fontBa}>{batteryPercentage}%</Text>
-                <Icon source={getBatteryIcon()} size={64} />
+                <Icon source={icon} size={64} color={color} />
               </Card.Content>
             </Card>
           </View>
@@ -127,7 +157,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    width: '50%',
+    width: '20%',
     height: '100%',
   },
   column2: {
