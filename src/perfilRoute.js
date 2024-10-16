@@ -159,10 +159,10 @@ const styles = StyleSheet.create({
 
   header: {
     backgroundColor: 'rgba(0, 0, 0, 0)', // Transparente
-    marginHorizontal: 300,
+    marginHorizontal: 290,
     borderBottomWidth: 0, // Remove a linha inferior
     paddingBottom: 0, // Remove o padding inferior
-    marginBottom: 89, // Remove o margin inferior
+    marginBottom: 70, // Remove o margin inferior
 },
   scrollViewContainer: {
     flexGrow: 1,
