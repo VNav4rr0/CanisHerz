@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     marginRight: 55,
     position: 'absolute',
     top: 0,
-    left: 0,
+    //left: 0,
   },
   bpmLabel: {
     fontSize: 15, // Tamanho do texto "BPM"
