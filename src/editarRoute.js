@@ -82,20 +82,14 @@ export default function EditarRoute() {
 
             <TextInput
               label="Nome Completo"
-              value={nickname}
-              onChangeText={setNickname}
               style={styles.input}
             />
             <TextInput
               label="Email"
-              value={nickname}
-              onChangeText={setNickname}
               style={styles.input}
             />
             <TextInput
               label="Senha"
-              value={nickname}
-              onChangeText={setNickname}
               style={styles.input}
             />
             <View style={styles.row}> 
