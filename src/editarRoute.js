@@ -34,7 +34,7 @@ export default function EditarRoute() {
               style={styles.backButton}
             />
             <Text style={styles.title}>
-              Edite Suas Informações!
+              Edite Suas Informações
             </Text>
           </View>
           <View>
@@ -107,14 +107,16 @@ export default function EditarRoute() {
 const styles = StyleSheet.create({
 
 tutor: {
-    fontSize: 20,
+    fontSize: 26,
     color: '#FFF',
-    marginBottom: 7,
+    marginBottom: 14,
+    marginVertical: 45,
 },
   dog: {
-  fontSize: 20,
+  fontSize: 26,
   color: '#FFF',
   marginBottom: 14,
+  marginVertical: 45,
   },  
   Provider: {
     fontFamily: 'Poppins_400Regular',
