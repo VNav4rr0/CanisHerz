@@ -119,11 +119,11 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'rgba(0, 0, 0, 0)', // Transparente
-    width: '100%',
+    marginHorizontal: 300,
     borderBottomWidth: 0, // Remove a linha inferior
     paddingBottom: 0, // Remove o padding inferior
     marginBottom: 89, // Remove o margin inferior
-  },
+},
   scrollViewContainer: {
     flexGrow: 1,
     paddingBottom: 50,
