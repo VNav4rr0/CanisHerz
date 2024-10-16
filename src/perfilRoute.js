@@ -9,7 +9,6 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 const PerfilRoute = () => { // Nome do componente deve começar com letra maiúscula
   const navigation = useNavigation(); // Inicializando o hook de navegação
-  const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [selectedDog, setSelectedDog] = useState(null);
   const [dogs, setDogs] = useState([]);
@@ -23,8 +22,7 @@ const PerfilRoute = () => { // Nome do componente deve começar com letra maiús
     fetchDogs();
   }, []);
 
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
+
 
   const handlePress = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -33,6 +31,10 @@ const PerfilRoute = () => { // Nome do componente deve começar com letra maiús
 
   const selectDog = (dog) => {
     setSelectedDog(dog);
+  };
+
+  const handlePresseditarRoute = () => {
+    navigation.navigate('EditarRoute');
   };
 
   const handlePressAddNovosDogs = () => {
@@ -53,7 +55,7 @@ const PerfilRoute = () => { // Nome do componente deve começar com letra maiús
             <Appbar.Header style={styles.header}>
               <Appbar.Content />
               <Appbar.Action icon="plus" onPress={handlePressAddNovosDogs} color="#fff" />
-              <Appbar.Action style={styles.btn} mode="contained" icon="pencil" onPress={() => {}} color="#fff" />
+              <Appbar.Action style={styles.btn} mode="contained" icon="pencil" onPress={handlePresseditarRoute} color="#fff" />
             </Appbar.Header>
 
             <Text style={styles.petName}>João Mendes</Text>
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'rgba(0, 0, 0, 0)', // Transparente
-    marginHorizontal: 300,
+    marginHorizontal: "auto",
     borderBottomWidth: 0, // Remove a linha inferior
     paddingBottom: 0, // Remove o padding inferior
     marginBottom: 89, // Remove o margin inferior
@@ -221,7 +223,7 @@ const styles = StyleSheet.create({
     marginRight: 55,
     position: 'absolute',
     top: 0,
-    //left: 0,
+    left: 0,
   },
   bpmLabel: {
     fontSize: 15, // Tamanho do texto "BPM"

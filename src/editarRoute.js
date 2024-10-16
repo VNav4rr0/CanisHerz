@@ -8,39 +8,17 @@ import { useNavigation } from '@react-navigation/native';
 // Prevent auto-hide of splash screen
 SplashScreen.preventAutoHideAsync();
 
-export default function AddNovosDogs() {
+export default function EditarRoute() {
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [weight, setWeight] = useState('');
   const [size, setSize] = useState('');
-  const [visible, setVisible] = useState(false);
-  const animation = useState(new Animated.Value(0))[0];
-  const theme = useTheme();
   const navigation = useNavigation();
 
   const handleGoBack = () => {
     navigation.goBack();
   };
 
-
-  const showModal = () => {
-    setVisible(true);
-    Animated.timing(animation, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const hideModal = () => {
-    Animated.timing(animation, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setVisible(false);
-    });
-  };
 
 
   return (
@@ -56,10 +34,13 @@ export default function AddNovosDogs() {
               style={styles.backButton}
             />
             <Text style={styles.title}>
-              Cadastre novos cachorros!
+              Edite Suas Informações!
             </Text>
           </View>
           <View>
+              <Text style={styles.dog}>
+                  Cachorro
+              </Text>
             <TextInput
               label="Apelido"
               value={nickname}
@@ -94,8 +75,33 @@ export default function AddNovosDogs() {
               </Picker>
             </View>
           </View>
+
+          <Text style={styles.tutor}>
+                  Tutor
+              </Text>
+
+            <TextInput
+              label="Nome Completo"
+              value={nickname}
+              onChangeText={setNickname}
+              style={styles.input}
+            />
+            <TextInput
+              label="Email"
+              value={nickname}
+              onChangeText={setNickname}
+              style={styles.input}
+            />
+            <TextInput
+              label="Senha"
+              value={nickname}
+              onChangeText={setNickname}
+              style={styles.input}
+            />
+            <View style={styles.row}> 
+            </View>
           <View>
-            <Button mode="contained" style={styles.button} labelStyle={{ color: '#fff' }} >Finalizar</Button>
+            <Button mode="contained" style={styles.button} labelStyle={{ color: '#fff' }} >Atualizar</Button>
           </View>
 
         </ScrollView>
@@ -105,6 +111,17 @@ export default function AddNovosDogs() {
 }
 
 const styles = StyleSheet.create({
+
+tutor: {
+    fontSize: 20,
+    color: '#FFF',
+    marginBottom: 7,
+},
+  dog: {
+  fontSize: 20,
+  color: '#FFF',
+  marginBottom: 14,
+  },  
   Provider: {
     fontFamily: 'Poppins_400Regular',
   },
@@ -127,7 +144,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'space-between',
   },
- 
+
   title: {
     fontSize: 40,
     fontWeight: 'bold',

@@ -9,6 +9,7 @@ import Formulario from './src/formulario';
 import CarregamentoNovo from './src/carregamentoNovo';
 import Home from './src/home';
 import AddNovosDogs from './src/addNovosDogs';
+import EditarRoute from './src/editarRoute';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,13 +35,11 @@ export default function App() {
                 },
               },
             },
-            cardStyleInterpolator: ({ current }) => {
-              return {
-                cardStyle: {
-                  opacity: current.progress,
-                },
-              };
-            },
+            cardStyleInterpolator: ({ current }) => ({
+              cardStyle: {
+                opacity: current.progress,
+              },
+            }),
           }}
         >
           <Stack.Screen name="Boasvindas" component={Boasvindas} />
@@ -49,6 +48,7 @@ export default function App() {
           <Stack.Screen name="CarregamentoNovo" component={CarregamentoNovo} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="AddNovosDogs" component={AddNovosDogs} />
+          <Stack.Screen name="EditarRoute" component={EditarRoute} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

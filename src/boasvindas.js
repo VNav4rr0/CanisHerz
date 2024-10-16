@@ -42,7 +42,6 @@ export default function Boasvindas() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    fontFamily: 'Poppins_400Regular',
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -59,7 +58,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFF',
     marginBottom: 24,
-    fontFamily: 'Poppins_700Bold',
   },
   button: {
     marginTop: 16,
