@@ -72,7 +72,7 @@ const CadastroTutor = () => {
                         </View>
                     </View>
                         <Button mode="contained" style={styles.button} onPress={handleCadastrar}>
-                            Cadastrar.
+                            Cadastrar
                         </Button>
                 </ScrollView>
             </ImageBackground>
