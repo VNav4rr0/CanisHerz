@@ -11,7 +11,7 @@ export default function Boasvindas() {
 
   const navigation = useNavigation();
   const handlePressFormulario = () => {
-    navigation.navigate('Formulario');
+    navigation.navigate('Login');
   };
 
   const handlePressSobreNos = () => {
@@ -27,7 +27,7 @@ export default function Boasvindas() {
           </Text>
           <View>
             <PaperButton mode="contained" style={styles.button} labelStyle={{ color: '#1E1E1E' }} onPress={handlePressFormulario}>
-              Cadastrar
+              Entrar
             </PaperButton>
             <PaperButton mode="text" labelStyle={{ color: '#fff' }} onPress={handlePressSobreNos}>
               Sobre Nós
@@ -64,3 +64,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
   },
 });
+

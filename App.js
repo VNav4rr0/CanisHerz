@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as PaperProvider } from 'react-native-paper';
+import * as SplashScreen from 'expo-splash-screen';
 
 import Boasvindas from './src/boasvindas';
 import SobreNos from './src/sobreNos';
@@ -10,10 +11,29 @@ import CarregamentoNovo from './src/carregamentoNovo';
 import Home from './src/home';
 import AddNovosDogs from './src/addNovosDogs';
 import EditarRoute from './src/editarRoute';
+import Login from './src/login';
+import CadastroTutor from './src/cadastroTutor';
 
 const Stack = createNativeStackNavigator();
 
+SplashScreen.preventAutoHideAsync(); // Impede que a splash screen feche automaticamente
+
 export default function App() {
+  useEffect(() => {
+    const prepare = async () => {
+      try {
+        // Carregue aqui qualquer recurso adicional que o app precise
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        // Oculta a splash screen após o carregamento
+        await SplashScreen.hideAsync();
+      }
+    };
+
+    prepare();
+  }, []);
+
   return (
     <PaperProvider>
       <NavigationContainer>
@@ -49,8 +69,11 @@ export default function App() {
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="AddNovosDogs" component={AddNovosDogs} />
           <Stack.Screen name="EditarRoute" component={EditarRoute} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="CadastroTutor" component={CadastroTutor} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
   );
 }
+
