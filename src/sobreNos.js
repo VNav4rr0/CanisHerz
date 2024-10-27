@@ -11,7 +11,7 @@ export default function SobreNos() {
     };
 
     return (
-        <ImageBackground source={require('../assets/caoBack.png')} style={styles.backgroundImage}>
+        <ImageBackground source={require('../assets/about.png')} style={styles.backgroundImage}>
             <View style={styles.container}>
                 <View style={styles.textContainer}>
                     <IconButton
@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'flex-end',
+        
     },
     backButton: {
         backgroundColor: '#FFF8F7',
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         width: '100%',
-        height: '60%',
+        height: '50%',
         backgroundColor: '#FFF8F7',
         padding: 20,
         borderTopEndRadius: 32,
