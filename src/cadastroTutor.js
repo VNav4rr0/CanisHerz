@@ -4,6 +4,7 @@ import { StyleSheet, View, ScrollView, Text, ImageBackground, ToastAndroid } fro
 import { TextInput, Button, Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
+
 const CadastroTutor = () => {
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
@@ -17,7 +18,8 @@ const CadastroTutor = () => {
         if (password === confirmPassword) {
             // Proceder com o cadastro
             console.log("Cadastro realizado com sucesso!");
-            navigation.navigate('Login');
+            navigation.navigate('Formulario');
+
             setErrorMessage(null); // Limpar mensagem de erro
         } else {
             setErrorMessage("As senhas não coincidem!");
@@ -74,7 +76,7 @@ const CadastroTutor = () => {
                         </View>
                     </View>
                         <Button mode="contained" style={styles.button} onPress={handleCadastrar}>
-                            Cadastrar
+                            Adicione o seu cachorro 
                         </Button>
                 </ScrollView>
             </ImageBackground>

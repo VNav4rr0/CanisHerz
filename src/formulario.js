@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
   },
   scrollContent: {
     padding: 16,
@@ -155,22 +154,8 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontFamily: 'Poppins_700Bold',
   },
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  image: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-  },
-  cameraButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    borderRadius: 20,
-    backgroundColor: '#D64235',
-  },
+ 
+ 
   input: {
     backgroundColor: '#FFF',
     marginBottom: 16,
