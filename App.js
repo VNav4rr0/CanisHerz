@@ -14,6 +14,7 @@ import EditarRoute from './src/editarRoute';
 import Login from './src/login';
 import CadastroTutor from './src/cadastroTutor';
 
+
 const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync(); // Impede que a splash screen feche automaticamente

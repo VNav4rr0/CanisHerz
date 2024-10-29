@@ -55,11 +55,12 @@ export default function AddNovosDogs() {
               iconColor="#fff"
               style={styles.backButton}
             />
-            <Text style={styles.title}>
-              Cadastre novos cachorros!
-            </Text>
+            
           </View>
           <View>
+          <Text style={styles.title}>
+              Cadastre novos cachorros!
+            </Text>
             <TextInput
               label="Apelido"
               value={nickname}
@@ -132,7 +133,8 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
     color: '#FFF',
-    marginTop:50,
+    marginBottom:32,
+
   },
   
   input: {

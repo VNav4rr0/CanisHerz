@@ -20,6 +20,12 @@ export default function Login() {
         navigation.navigate('CadastroTutor');
     };
 
+    const handleSubmit = () => {
+        navigation.navigate('CarregamentoNovo', {
+          
+        });
+      };
+
 
 
     return (
@@ -66,7 +72,7 @@ export default function Login() {
 
                     <View>
                         <Button mode="outlined" labelStyle={{ color: '#fff', fontSize: 16 }} style={{ borderColor: '#fff' }} onPress={handleCadastrar}>Cadastrar-se</Button>
-                        <Button mode="contained" style={styles.button} labelStyle={{ color: '#fff', fontSize: 16  }} >Entrar</Button>
+                        <Button mode="contained" style={styles.button} labelStyle={{ color: '#fff', fontSize: 16  }} onPress={handleSubmit} >Entrar</Button>
                     </View>
 
                 </ScrollView>

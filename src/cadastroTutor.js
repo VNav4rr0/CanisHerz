@@ -25,6 +25,8 @@ const CadastroTutor = () => {
         ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
     };
 
+   
+
     return (
         <Provider>
             <ImageBackground source={require('../assets/patas.png')} style={styles.container}>
