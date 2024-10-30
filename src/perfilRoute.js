@@ -1,28 +1,72 @@
-import React, { useState, useEffect } from "react";
-import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager } from "react-native";
-import { Provider, List, Icon, Appbar } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native'; // Importação do hook useNavigation
+import React, { useState, useEffect } from 'react';
+import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager, Alert } from 'react-native';
+import { Provider, List, Appbar, Icon } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { doc, onSnapshot, collection } from 'firebase/firestore';
+import { firestore, auth } from './firebaseConfig';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-const PerfilRoute = () => { // Nome do componente deve começar com letra maiúscula
-  const navigation = useNavigation(); // Inicializando o hook de navegação
+const PerfilRoute = () => {
+  const navigation = useNavigation();
   const [expanded, setExpanded] = useState(false);
   const [selectedDog, setSelectedDog] = useState(null);
   const [dogs, setDogs] = useState([]);
+  const [tutorName, setTutorName] = useState('');
 
-  const fetchDogs = async () => {
-    const fetchedDogs = ["Pitico", "Thor", "Max"];
-    setDogs(fetchedDogs);
+  // Enable animation for Android
+  if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+
+  // Function to fetch profile data of the tutor
+  const fetchProfileData = () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userId = user.uid;
+      const docRef = doc(firestore, 'Tutores', userId);
+
+      // Use onSnapshot to listen for changes in the tutor document
+      onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setTutorName(docSnap.data().Nome || 'Usuário'); // Use 'Nome' to get the correct name
+        }
+      }, (error) => {
+        console.error('Error fetching tutor data:', error);
+      });
+    }
   };
 
+  const fetchDogs = () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userId = user.uid;
+      const dogsCol = collection(firestore, 'Tutores', userId, 'Cachorros');
+
+      // Using onSnapshot to listen for changes in the dogs collection
+      const unsubscribe = onSnapshot(dogsCol, (snapshot) => {
+        const dogsList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setDogs(dogsList); // Update the list of dogs
+      }, (error) => {
+        console.error('Error fetching dogs data:', error);
+      });
+
+      // Return the unsubscribe function to stop listening on component unmount
+      return unsubscribe;
+    }
+  };
+
+  // useEffect to fetch profile and dogs data when the component mounts
   useEffect(() => {
-    fetchDogs();
+    fetchProfileData();
+    const unsubscribeDogs = fetchDogs();
+
+    // Cleanup the unsubscribe function on unmount
+    return () => {
+      if (unsubscribeDogs) unsubscribeDogs();
+    };
   }, []);
-
-
 
   const handlePress = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -30,35 +74,39 @@ const PerfilRoute = () => { // Nome do componente deve começar com letra maiús
   };
 
   const selectDog = (dog) => {
-    setSelectedDog(dog);
+    setSelectedDog(dog); // Update the selected dog
   };
 
   const handlePresseditarRoute = () => {
-    navigation.navigate('EditarRoute');
+    if (!selectedDog) {
+      Alert.alert('Atenção', 'Por favor, selecione um cachorro antes de editar.'); // Alert if no dog is selected
+    } else {
+      navigation.navigate('EditarRoute', { dog: selectedDog }); // Pass the selected dog data
+    }
   };
 
   const handlePressAddNovosDogs = () => {
     navigation.navigate('AddNovosDogs');
   };
 
-  const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
-  
   return (
     <Provider>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        <ImageBackground
-          source={require('../assets/header.png')}
-          style={styles.headerBackground}
-          imageStyle={styles.headerImage}
-        >
+        <ImageBackground source={require('../assets/header.png')} style={styles.headerBackground} imageStyle={styles.headerImage}>
           <View style={styles.overlay}>
             <Appbar.Header style={styles.header}>
               <Appbar.Content />
               <Appbar.Action icon="plus" onPress={handlePressAddNovosDogs} color="#fff" />
-              <Appbar.Action style={styles.btn} mode="contained" icon="pencil" onPress={handlePresseditarRoute} color="#fff" />
+              <Appbar.Action 
+                style={styles.btn} 
+                mode="contained" 
+                icon="pencil" 
+                onPress={handlePresseditarRoute} 
+                color="#fff" 
+                disabled={!selectedDog} // Disable button if no dog is selected
+              />
             </Appbar.Header>
-
-            <Text style={styles.petName}>João Mendes</Text>
+            <Text style={styles.petName}>{tutorName}</Text>
           </View>
         </ImageBackground>
 
@@ -69,16 +117,16 @@ const PerfilRoute = () => { // Nome do componente deve começar com letra maiús
             onPress={handlePress}
             style={styles.customAccordion}
             titleStyle={styles.accordionTitle}
-            description={selectedDog ? `Cão selecionado: ${selectedDog}` : "Selecione um cão para medir os batimentos"}
+            description={selectedDog ? `Cão selecionado: ${selectedDog.Apelido}` : 'Selecione um cão para medir os batimentos'}
           >
             <View style={styles.accordionItemContainer}>
               <ScrollView style={styles.accordionItemsScroll}>
                 {dogs.map((dog) => (
-                  <List.Item
-                    key={dog}
-                    title={dog}
-                    style={styles.accordionItem}
-                    onPress={() => selectDog(dog)}
+                  <List.Item 
+                    key={dog.id} // Use ID as unique key
+                    title={dog.Apelido} // Display the dog's nickname
+                    style={styles.accordionItem} 
+                    onPress={() => selectDog(dog)} // Select the dog
                   />
                 ))}
               </ScrollView>
@@ -90,19 +138,22 @@ const PerfilRoute = () => { // Nome do componente deve começar com letra maiús
           <Text style={styles.cardioTitle}>Dados Cardíacos</Text>
         </View>
 
-        {/* Dados Cardíacos */}
-        {Array(4).fill().map((_, index) => ( // Gera 4 seções de dados cardíacos
+        {/* Heart Data */}
+        {Array(4).fill().map((_, index) => (
           <View key={index} style={styles.container}>
             <View style={styles.bpmContainer}>
               <View style={styles.heartContainer}>
-                <Text style={styles.bpmLabel}><Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda</Text>
+                <Text style={styles.bpmLabel}>
+                  <Icon source="thumb-up" size={17} style={styles.likeIcon} /> Segunda
+                </Text>
                 <Text style={styles.bpmText}>100 BPM</Text>
               </View>
-              <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
+              <Text style={styles.resultado}>
+                <Icon source="check" size={16} style={styles.heartIcon} /> Normal 
+              </Text>
             </View>
           </View>
         ))}
-
       </ScrollView>
     </Provider>
   );
@@ -120,12 +171,12 @@ const styles = StyleSheet.create({
     marginBottom: 19,
   },
   header: {
-    backgroundColor: 'rgba(0, 0, 0, 0)', // Transparente
+    backgroundColor: 'rgba(0, 0, 0, 0)',
     marginHorizontal: "auto",
-    borderBottomWidth: 0, // Remove a linha inferior
-    paddingBottom: 0, // Remove o padding inferior
-    marginBottom: 89, // Remove o margin inferior
-},
+    borderBottomWidth: 0,
+    paddingBottom: 0,
+    marginBottom: 89,
+  },
   scrollViewContainer: {
     flexGrow: 1,
     paddingBottom: 50,
@@ -169,7 +220,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   accordionItemsScroll: {
-    maxHeight: 150,  // Limita a altura do scroll
+    maxHeight: 150,
   },
   accordionItemContainer: {
     overflow: 'hidden',
@@ -193,7 +244,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
-    position: 'relative',
     backgroundColor: '#FFF8F7',
     padding: 10,
     borderRadius: 20,
@@ -218,7 +268,7 @@ const styles = StyleSheet.create({
     color: '#1C1B1F',
   },
   likeIcon: {
-    fontSize: 24, // Altere o tamanho conforme necessário
+    fontSize: 24,
     marginLeft: 10,
     marginRight: 55,
     position: 'absolute',
@@ -226,13 +276,12 @@ const styles = StyleSheet.create({
     left: 0,
   },
   bpmLabel: {
-    fontSize: 15, // Tamanho do texto "BPM"
+    fontSize: 15,
     color: '#1C1B1F',
     position: 'absolute',
-    top: -5, // Ajuste a posição vertical conforme necessário
-    left: 8, // Ajuste a posição horizontal conforme necessário
-    paddingLeft: -10, // Adiciona espaço entre o ícone e o texto "Segunda"
+    top: -5,
+    left: 8,
   },
 });
 
-export default PerfilRoute; // A exportação deve corresponder ao nome do componente
+export default PerfilRoute;

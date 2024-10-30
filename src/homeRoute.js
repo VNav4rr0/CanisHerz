@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ImageBackground } from 'react-native';
 import { Button, Provider, IconButton, Card, Icon } from 'react-native-paper';
+import { auth } from './firebaseConfig'; // Certifique-se de que o caminho está correto
 
 const HomeRoute = () => {
-  const [batteryPercentage, setBatteryPercentage] = useState(100); // Initial battery percentage
+  const [batteryPercentage, setBatteryPercentage] = useState(100); // Porcentagem inicial da bateria
 
-  // Function to deduct battery percentage
+  // Função para deduzir a porcentagem da bateria
   const reduceBattery = (amount) => {
-    setBatteryPercentage((prev) => Math.max(prev - amount, 0)); // Reduce battery but not below 0
+    setBatteryPercentage((prev) => Math.max(prev - amount, 0)); // Deduza a bateria mas não abaixo de 0
   };
 
-  // Function to get the icon and color based on battery percentage
+  // Função para obter o ícone e a cor com base na porcentagem da bateria
   const getBatteryIconAndColor = () => {
     let icon = "";
     let color = "";
@@ -54,6 +55,15 @@ const HomeRoute = () => {
   };
 
   const { icon, color } = getBatteryIconAndColor();
+
+  // useEffect para obter e logar o ID do usuário
+  useEffect(() => {
+    const user = auth.currentUser; // Obtém o usuário atual
+    if (user) {
+    } else {
+      console.log("Nenhum usuário autenticado.");
+    }
+  }, []);
 
   return (
     <Provider>

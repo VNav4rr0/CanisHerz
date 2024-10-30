@@ -1,47 +1,56 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Text, Image, ImageBackground, Animated, TouchableWithoutFeedback } from 'react-native';
-import * as SplashScreen from 'expo-splash-screen';
-import { TextInput, Button, Provider, IconButton, Portal, useTheme } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, ScrollView, Text, ImageBackground, ToastAndroid } from 'react-native';
+import { TextInput, Button, Provider, IconButton } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
-
-// Prevent auto-hide of splash screen
-SplashScreen.preventAutoHideAsync();
+import { auth, firestore } from './firebaseConfig'; // Certifique-se de que está importando corretamente
 
 export default function AddNovosDogs() {
   const [nickname, setNickname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [weight, setWeight] = useState('');
   const [size, setSize] = useState('');
-  const [visible, setVisible] = useState(false);
-  const animation = useState(new Animated.Value(0))[0];
-  const theme = useTheme();
   const navigation = useNavigation();
+  const [userId, setUserId] = useState(null);
 
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
-
-
-  const showModal = () => {
-    setVisible(true);
-    Animated.timing(animation, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const hideModal = () => {
-    Animated.timing(animation, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setVisible(false);
+  // Obtém o ID do usuário autenticado
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        // Se não estiver autenticado, redirecionar para a tela de login ou tratamento
+        navigation.navigate('Login'); // Mude para o nome da sua tela de login
+      }
     });
-  };
 
+    return unsubscribe; // Limpa o listener ao desmontar o componente
+  }, [navigation]);
+
+  const handleFinalizar = async () => {
+    // Verifique se os campos estão preenchidos
+    if (!nickname.trim() || !birthDate.trim() || !weight.trim() || !size) {
+      ToastAndroid.show("Por favor, preencha todos os campos.", ToastAndroid.SHORT);
+      return;
+    }
+  
+    try {
+      // Armazenando dados do cachorro no Firestore
+      await firestore.collection('Tutores').doc(userId).collection('Cachorros').add({
+        Apelido: nickname,
+        Nascimento: birthDate,
+        Peso: weight,
+        Porte: size,
+      });
+  
+      ToastAndroid.show("Cachorro cadastrado com sucesso!", ToastAndroid.SHORT);
+      navigation.navigate('Home'); // Navega para a tela Home
+    } catch (error) {
+      console.error("Erro ao cadastrar cachorro:", error);
+      ToastAndroid.show("Erro ao cadastrar cachorro. Tente novamente.", ToastAndroid.SHORT);
+    }
+  };
+  
 
   return (
     <Provider>
@@ -50,17 +59,14 @@ export default function AddNovosDogs() {
           <View style={styles.titleCont}>
             <IconButton
               icon="arrow-left"
-              onPress={handleGoBack}
+              onPress={() => navigation.goBack()}
               size={24}
               iconColor="#fff"
               style={styles.backButton}
             />
-            
           </View>
           <View>
-          <Text style={styles.title}>
-              Cadastre novos cachorros!
-            </Text>
+            <Text style={styles.title}>Cadastre novos cachorros!</Text>
             <TextInput
               label="Apelido"
               value={nickname}
@@ -71,13 +77,13 @@ export default function AddNovosDogs() {
               <TextInput
                 label="Data de Nascimento"
                 value={birthDate}
-                onChangeText={text => setBirthDate(text)}
+                onChangeText={setBirthDate}
                 style={[styles.input, styles.halfInput]}
               />
               <TextInput
                 label="Peso"
                 value={weight}
-                onChangeText={text => setWeight(text)}
+                onChangeText={setWeight}
                 style={[styles.input, styles.halfInput, styles.peso]}
               />
             </View>
@@ -89,6 +95,7 @@ export default function AddNovosDogs() {
                 style={styles.picker}
                 mode="dialog"
               >
+                <Picker.Item label="Selecione o porte" value="" />
                 <Picker.Item label="Pequeno" value="Pequeno" />
                 <Picker.Item label="Médio" value="Médio" />
                 <Picker.Item label="Grande" value="Grande" />
@@ -96,9 +103,10 @@ export default function AddNovosDogs() {
             </View>
           </View>
           <View>
-            <Button mode="contained" style={styles.button} labelStyle={{ color: '#fff' }} >Finalizar</Button>
+            <Button mode="contained" style={styles.button} labelStyle={{ color: '#fff' }} onPress={handleFinalizar}>
+              Finalizar
+            </Button>
           </View>
-
         </ScrollView>
       </ImageBackground>
     </Provider>
@@ -106,21 +114,18 @@ export default function AddNovosDogs() {
 }
 
 const styles = StyleSheet.create({
-  Provider: {
-    fontFamily: 'Poppins_400Regular',
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
   },
-  titleCont:{
-    position:'relative',
+  titleCont: {
+    position: 'relative',
   },
-  backButton:{
-    position:'absolute',
-    left:-10,
-    top:0,
+  backButton: {
+    position: 'absolute',
+    left: -10,
+    top: 0,
   },
   scrollContent: {
     padding: 16,
@@ -128,15 +133,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'space-between',
   },
- 
   title: {
     fontSize: 40,
     fontWeight: 'bold',
     color: '#FFF',
-    marginBottom:32,
-
+    marginBottom: 32,
   },
-  
   input: {
     backgroundColor: '#FFF',
     marginBottom: 16,
@@ -173,41 +175,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#49454F',
   },
-  link: {
-    color: '#FFF',
-    textDecorationLine: 'underline',
-    marginBottom: 16,
-  },
   button: {
     marginTop: 16,
     backgroundColor: '#BE0C12',
-    height: 40, 
-    paddingVertical: 0, 
-    paddingHorizontal: 10, 
-    alignSelf: 'center', 
-},
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 10,
-    fontFamily: 'Poppins_700Bold',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    fontFamily: 'Poppins_400Regular',
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  modalButton: {
-    marginTop: 20,
-    backgroundColor: '#D64235',
+    height: 40,
+    paddingVertical: 0,
+    paddingHorizontal: 10,
+    alignSelf: 'center',
   },
 });

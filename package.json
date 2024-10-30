@@ -10,7 +10,13 @@
   },
   "dependencies": {
     "@expo-google-fonts/poppins": "^0.2.3",
+    "@expo/metro-runtime": "~3.2.3",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/blur": "^4.4.0",
+    "@react-native-firebase/analytics": "^21.2.0",
+    "@react-native-firebase/app": "^21.2.0",
+    "@react-native-firebase/auth": "^21.2.0",
+    "@react-native-firebase/firestore": "^21.2.0",
     "@react-native-picker/picker": "2.7.5",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
@@ -21,7 +27,9 @@
     "expo-linear-gradient": "~13.0.2",
     "expo-splash-screen": "~0.27.6",
     "expo-status-bar": "~1.12.1",
+    "firebase": "^11.0.1",
     "react": "^18.2.0",
+    "react-dom": "18.2.0",
     "react-native": "0.74.5",
     "react-native-paper": "^5.12.5",
     "react-native-reanimated": "~3.10.1",
@@ -30,9 +38,7 @@
     "react-native-svg": "15.2.0",
     "react-native-svg-transformer": "^1.5.0",
     "react-native-vector-icons": "^10.1.0",
-    "react-native-web": "~0.19.10",
-    "react-dom": "18.2.0",
-    "@expo/metro-runtime": "~3.2.3"
+    "react-native-web": "~0.19.10"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0"

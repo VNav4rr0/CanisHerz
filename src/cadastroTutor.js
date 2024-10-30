@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Text, ImageBackground, ToastAndroid } from 'react-native';
 import { TextInput, Button, Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-
+import { auth, firestore } from './firebaseConfig'; // Certifique-se de que está importando corretamente
 
 const CadastroTutor = () => {
     const [nome, setNome] = useState('');
@@ -13,28 +12,40 @@ const CadastroTutor = () => {
     const [errorMessage, setErrorMessage] = useState(null);
     const navigation = useNavigation();
 
-    const handleCadastrar = () => {
-        // Lógica de cadastro
+    const handleCadastrar = async () => {
         if (password === confirmPassword) {
-            // Proceder com o cadastro
-            console.log("Cadastro realizado com sucesso!");
-            navigation.navigate('Formulario');
+            try {
+                // Cadastro no Firebase Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const userId = userCredential.user.uid;
 
-            setErrorMessage(null); // Limpar mensagem de erro
+                // Armazenando dados adicionais no Firestore
+                await firestore.collection('Tutores').doc(userId).set({
+                    Nome: nome, 
+                    Email: email,   
+                });
+
+                ToastAndroid.show("Cadastro realizado com sucesso!", ToastAndroid.SHORT);
+                navigation.navigate('AddNovosDogs'); // Navega para a tela AddNovosDogs
+
+            } catch (error) {
+                console.error("Erro de autenticação:", error);
+                setErrorMessage("Erro ao cadastrar. Tente novamente.");
+            }
         } else {
             setErrorMessage("As senhas não coincidem!");
         }
-        ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
-    };
 
-   
+        if (errorMessage) {
+            ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
+        }
+    };
 
     return (
         <Provider>
             <ImageBackground source={require('../assets/patas.png')} style={styles.container}>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.form}>
-                       
                         <View style={styles.inputCont}>
                             <Text style={styles.title}>Cadastro</Text>
                             <Text style={styles.text}>Para começar, cadastre suas informações.</Text>
@@ -75,9 +86,9 @@ const CadastroTutor = () => {
                             />
                         </View>
                     </View>
-                        <Button mode="contained" style={styles.button} onPress={handleCadastrar}>
-                            Adicione o seu cachorro 
-                        </Button>
+                    <Button mode="contained" style={styles.button} onPress={handleCadastrar}>
+                        Adicione o seu cachorro 
+                    </Button>
                 </ScrollView>
             </ImageBackground>
         </Provider>
@@ -116,17 +127,6 @@ const styles = StyleSheet.create({
         marginTop: 16,
         backgroundColor: '#B3261E',
     },
-    toast: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 16,
-        backgroundColor: '#FFF',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
 });
 
 export default CadastroTutor;
-
