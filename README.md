@@ -1,5 +1,5 @@
 # CanisHerz 🐶❤️
-Monitoramento Inteligente da Frequência Cardíaca para Cães com Predisposição a Cardiopatias**
+Monitoramento Inteligente da Frequência Cardíaca para Cães com Predisposição a Cardiopatias
 
 🌐 **Sobre o Projeto**  
 O **CanisHerz** é um projeto de TCC que visa desenvolver uma solução inovadora para monitorar a saúde cardíaca de cães, especialmente aqueles com predisposição a doenças cardíacas. Através de um sistema que combina tecnologia de sensores de batimentos com o microcontrolador ESP32, o CanisHerz coleta dados em tempo real e oferece informações essenciais para um acompanhamento eficaz.
