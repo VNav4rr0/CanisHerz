@@ -1,57 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Text, ImageBackground } from 'react-native';
 import { TextInput, Button, Provider, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from './firebaseConfig'; // Ajuste o caminho conforme necessário
-import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Importar as rotas
-import HomeRoute from './homeRoute';
-import MedidorRoute from './medidorRoute';
-import PerfilRoute from './perfilRoute';
-import { BottomNavigation } from 'react-native-paper';
-
-export default function Home() {
-  const navigation = useNavigation();
-  const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    { key: 'home', title: 'Home', focusedIcon: 'home', unfocusedIcon: 'home-outline' },
-    { key: 'medidor', title: 'Medidor', focusedIcon: 'heart', unfocusedIcon: 'heart-outline' },
-    { key: 'perfil', title: 'Perfil', focusedIcon: 'dog', unfocusedIcon: 'bone' },
-  ]);
-
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        navigation.navigate('Login'); // Redireciona para a tela de login se o usuário não estiver autenticado
-      }
-    });
-    return unsubscribe; // Limpeza ao desmontar o componente
-  }, [navigation]);
-
-  const renderScene = BottomNavigation.SceneMap({
-    home: HomeRoute,
-    medidor: MedidorRoute,
-    perfil: PerfilRoute,
-  });
-
-  return (
-    <BottomNavigation
-      navigationState={{ index, routes }}
-      onIndexChange={setIndex}
-      renderScene={renderScene}
-      barStyle={styles.navBar}
-      activeColor="#232323"
-      inactiveColor="#757575"
-    />
-  );
-}
-
-export function Login() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
@@ -64,15 +19,16 @@ export function Login() {
     navigation.navigate('CadastroTutor');
   };
 
-  const handleSubmit = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate('Home'); // Navega para a tela Home após login bem-sucedido
-    } catch (error) {
+const handleSubmit = () => {
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      navigation.navigate('Home');
+    })
+    .catch((error) => {
       console.error("Erro ao fazer login:", error);
-      // Exibir uma mensagem de erro para o usuário, se necessário
-    }
-  };
+    });
+};
+
 
   return (
     <Provider>
@@ -174,5 +130,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     alignSelf: 'center',
     width: '100%',
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  modalButton: {
+    marginTop: 20,
+    backgroundColor: '#D64235',
   },
 });

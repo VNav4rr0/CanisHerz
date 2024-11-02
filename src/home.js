@@ -1,10 +1,9 @@
-// Home.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BottomNavigation, Provider } from 'react-native-paper';
-import { auth } from './firebaseConfig'; // Ajuste o caminho conforme necessário
-import HomeRoute from './homeRoute'; // Corrija o caminho se necessário
-import MedidorRoute from './medidorRoute'; // Corrija o caminho se necessário
-import PerfilRoute from './perfilRoute'; // Corrija o caminho se necessário
+import { BackHandler } from 'react-native';
+import HomeRoute from './homeRoute';
+import MedidorRoute from './medidorRoute';
+import PerfilRoute from './perfilRoute';
 
 export default function Home() {
   const [index, setIndex] = useState(0);
@@ -14,7 +13,12 @@ export default function Home() {
     { key: 'perfil', title: 'Perfil', focusedIcon: 'dog', unfocusedIcon: 'bone' },
   ]);
 
-  // Renderiza as cenas conforme a aba selecionada
+  // Bloqueia o retorno ao montar o componente
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
+    return () => backHandler.remove();
+  }, []);
+
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
     medidor: MedidorRoute,
@@ -28,8 +32,8 @@ export default function Home() {
         onIndexChange={setIndex}
         renderScene={renderScene}
         barStyle={styles.navBar}
-        activeColor="#232323" // Cor dos ícones selecionados
-        inactiveColor="#757575" // Cor dos ícones não selecionados
+        activeColor="#232323"
+        inactiveColor="#757575"
       />
     </Provider>
   );

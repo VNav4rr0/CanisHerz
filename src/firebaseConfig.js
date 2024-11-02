@@ -18,11 +18,6 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-// Set authentication persistence
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-  .catch((error) => {
-    console.error("Error setting persistence: ", error);
-  });
 
 // Export authentication and Firestore services
 const auth = firebase.auth();

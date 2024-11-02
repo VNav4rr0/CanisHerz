@@ -15,37 +15,31 @@ import AddNovosDogs from './src/addNovosDogs';
 import EditarRoute from './src/editarRoute';
 import Login from './src/login';
 import CadastroTutor from './src/cadastroTutor';
-
 const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync(); // Impede que a splash screen feche automaticamente
 
 export default function App() {
-  const [user, setUser] = useState(null); // Estado para armazenar informações do usuário
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const prepare = async () => {
-      try {
-        // Carregue aqui qualquer recurso adicional que o app precise
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        // Oculta a splash screen após o carregamento
-        await SplashScreen.hideAsync();
-      }
-    };
-
-    // Verifica o estado de autenticação do usuário
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
+    return () => unsubscribe();
+  }, []);  
 
-    prepare();
-
-    // Limpeza ao desmontar o componente
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser !== null) {
+        SplashScreen.hideAsync();
+      }
+    });
     return () => unsubscribe();
   }, []);
-
+  
   return (
     <PaperProvider>
       <NavigationContainer>
@@ -78,7 +72,6 @@ export default function App() {
           <Stack.Screen name="Formulario" component={Formulario} />
           <Stack.Screen name="SobreNos" component={SobreNos} />
           <Stack.Screen name="CarregamentoNovo" component={CarregamentoNovo} />
-          {/* Redireciona para a Home se o usuário estiver autenticado, caso contrário vai para a tela de Login */}
           <Stack.Screen name="Home" component={user ? Home : Login} />
           <Stack.Screen name="AddNovosDogs" component={AddNovosDogs} />
           <Stack.Screen name="EditarRoute" component={EditarRoute} />

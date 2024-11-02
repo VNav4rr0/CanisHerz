@@ -11,7 +11,7 @@
   "dependencies": {
     "@expo-google-fonts/poppins": "^0.2.3",
     "@expo/metro-runtime": "~3.2.3",
-    "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/blur": "^4.4.0",
     "@react-native-firebase/analytics": "^21.2.0",
     "@react-native-firebase/app": "^21.2.0",

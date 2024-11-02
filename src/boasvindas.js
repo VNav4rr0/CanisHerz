@@ -1,16 +1,24 @@
+// Boasvindas.js
 import React, { useEffect } from 'react';
 import { StyleSheet, View, ScrollView, Text, ImageBackground } from 'react-native';
-import { Provider as PaperProvider, Button as PaperButton,  } from 'react-native-paper';
+import { Provider as PaperProvider, Button as PaperButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
 
-// Prevent auto-hide of splash screen outside the component
 SplashScreen.preventAutoHideAsync();
 
 export default function Boasvindas() {
-
   const navigation = useNavigation();
-  const handlePressFormulario = () => {
+
+  useEffect(() => {
+    // Oculta a splash screen quando o componente termina de carregar
+    SplashScreen.hideAsync();
+  }, []);
+
+  const handlePressFormulario = async () => {
+    // Marca que o usuário já viu a tela de boas-vindas
+    await AsyncStorage.setItem('hasSeenWelcome', 'true');
     navigation.navigate('Login');
   };
 
@@ -64,4 +72,3 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
   },
 });
-

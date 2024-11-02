@@ -251,7 +251,6 @@ const styles = StyleSheet.create({
     top: -5, // Ajuste a posição vertical conforme necessário
     left: 8, // Ajuste a posição horizontal conforme necessário
   },
-  
   button: {
     backgroundColor: '#BE0C12',
     marginBottom: 20,
