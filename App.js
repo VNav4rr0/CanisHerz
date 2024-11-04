@@ -15,6 +15,10 @@ import AddNovosDogs from './src/addNovosDogs';
 import EditarRoute from './src/editarRoute';
 import Login from './src/login';
 import CadastroTutor from './src/cadastroTutor';
+import EsqueceuSenha from './src/esqueceusenha';
+import SelecionarDispositivo from './src/selecionardispositivo';
+
+
 const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync(); // Impede que a splash screen feche automaticamente
@@ -77,6 +81,8 @@ export default function App() {
           <Stack.Screen name="EditarRoute" component={EditarRoute} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="CadastroTutor" component={CadastroTutor} />
+          <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenha} />
+          <Stack.Screen name="SelecionarDispositivo" component={SelecionarDispositivo} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>

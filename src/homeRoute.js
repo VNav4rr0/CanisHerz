@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ImageBackground } from 'react-native';
 import { Button, Provider, IconButton, Card, Icon } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import { auth } from './firebaseConfig'; // Certifique-se de que o caminho está correto
 
 const HomeRoute = () => {
-  const [batteryPercentage, setBatteryPercentage] = useState(100); // Porcentagem inicial da bateria
+  const [batteryPercentage, setBatteryPercentage] = useState(100);// Porcentagem inicial da bateria
+
+  const setDevice = () => {
+    navigation.navigate('SelecionarDispositivo');
+  };
 
   // Função para deduzir a porcentagem da bateria
   const reduceBattery = (amount) => {
@@ -90,7 +95,8 @@ const HomeRoute = () => {
                 <Text style={{ fontSize: 25 }}>Não Conectado</Text>
               </Card.Content>
             </Card>
-            <Button buttonColor="#BE0C12" mode="contained">Parear</Button>
+            <Button buttonColor="#BE0C12" mode="contained" onPress={setDevice}>Parear</Button>
+            
           </View>
           <View style={styles.column}>
             <Card mode='outlined' style={[styles.cont, { backgroundColor: '#FFF8F7', width: '100%', borderRadius: 32 }]}>

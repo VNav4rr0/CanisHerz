@@ -4,7 +4,6 @@ import { TextInput, Button, Provider, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from './firebaseConfig'; // Ajuste o caminho conforme necessário
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -19,16 +18,20 @@ export default function Login() {
     navigation.navigate('CadastroTutor');
   };
 
-const handleSubmit = () => {
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      navigation.navigate('Home');
-    })
-    .catch((error) => {
-      console.error("Erro ao fazer login:", error);
-    });
-};
+  const handleForgotPassword = () => {
+    // Navegar para a tela de redefinição de senha e passar o e-mail
+    navigation.navigate('EsqueceuSenha', { email });
+  };
 
+  const handleSubmit = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        navigation.navigate('Home');
+      })
+      .catch((error) => {
+        console.error("Erro ao fazer login:", error);
+      });
+  };
 
   return (
     <Provider>
@@ -64,7 +67,7 @@ const handleSubmit = () => {
               secureTextEntry
               theme={{ colors: { primary: '#900C0A' } }}
             />
-            <Button mode="text" style={styles.esqueceu} labelStyle={{ color: '#fff', fontSize: 16 }}>
+            <Button mode="text" style={styles.esqueceu} labelStyle={{ color: '#fff', fontSize: 16 }} onPress={handleForgotPassword}>
               Esqueceu a Senha?
             </Button>
           </View>
