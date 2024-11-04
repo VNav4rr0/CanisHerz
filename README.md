@@ -23,4 +23,4 @@ O **CanisHerz** é um projeto de TCC que visa desenvolver uma solução inovador
 ---
 
 ## 🎯 Objetivo  
-O CanisHerz oferece um cuidado contínuo e integrado, proporcionando informações vitais e possibilitando uma resposta rápida a alterações na saúde do animal. Este projeto não apenas melhora a qualidade de vida dos cães, mas também permite que os tutores ofereçam um suporte personalizado e ágil.
+O CanisHerz oferece um cuidado contínuo e integrado, proporcionando informações vitais e possibilitando uma resposta rápida a alterações na saúde do animal. Este projeto não apenas melhora a qualidade de vida dos cães, mas também permite que os tutores ofereçam um suporte personalizado e ágil..
