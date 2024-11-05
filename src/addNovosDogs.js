@@ -72,6 +72,8 @@ export default function AddNovosDogs() {
               value={nickname}
               onChangeText={setNickname}
               style={styles.input}
+              theme={{ colors: { primary: '#900C0A' } }}
+
             />
             <View style={styles.row}>
               <TextInput
@@ -79,12 +81,16 @@ export default function AddNovosDogs() {
                 value={birthDate}
                 onChangeText={setBirthDate}
                 style={[styles.input, styles.halfInput]}
+                theme={{ colors: { primary: '#900C0A' } }}
+
               />
               <TextInput
                 label="Peso"
                 value={weight}
                 onChangeText={setWeight}
                 style={[styles.input, styles.halfInput, styles.peso]}
+                theme={{ colors: { primary: '#900C0A' } }}
+
               />
             </View>
             <View style={styles.pickerContainer}>

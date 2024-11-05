@@ -72,11 +72,11 @@ export default function Login() {
             </Button>
           </View>
           <View>
-            <Button mode="outlined" labelStyle={{ color: '#fff', fontSize: 16 }} style={{ borderColor: '#fff' }} onPress={handleCadastrar}>
-              Cadastrar-se
-            </Button>
             <Button mode="contained" style={styles.button} labelStyle={{ color: '#fff', fontSize: 16 }} onPress={handleSubmit}>
               Entrar
+            </Button>
+            <Button mode="outlined" labelStyle={{ color: '#fff', fontSize: 16 }} style={{ borderColor: '#fff' }} onPress={handleCadastrar}>
+              Cadastrar-se
             </Button>
           </View>
         </ScrollView>
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   button: {
-    marginTop: 16,
+    marginBottom: 16,
     backgroundColor: '#B3261E',
     height: 40,
     paddingVertical: 0,

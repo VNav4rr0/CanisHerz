@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Text, Image, ImageBackground, Animated, TouchableWithoutFeedback } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
-import { TextInput, Button, Provider, IconButton, Portal, useTheme } from 'react-native-paper';
+import { TextInput, Button, Provider, Portal, useTheme, Banner } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 
@@ -13,7 +13,7 @@ export default function Formulario() {
   const [birthDate, setBirthDate] = useState('');
   const [weight, setWeight] = useState('');
   const [size, setSize] = useState('');
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true); // Set to true to show the Banner initially
   const animation = useState(new Animated.Value(0))[0];
   const theme = useTheme();
   const navigation = useNavigation();
@@ -43,42 +43,78 @@ export default function Formulario() {
     });
   };
 
-  const handleNavigate = () => {
-    navigation.navigate('CarregamentoNovo');
-  };
-
   return (
     <Provider>
+      {/* Banner Component */}
+      <Banner
+        visible={visible}
+        actions={[
+          {
+            label: 'Fix it',
+            onPress: () => setVisible(false),
+          },
+          {
+            label: 'Learn more',
+            onPress: () => setVisible(false),
+          },
+        ]}
+        icon={({ size }) => (
+          <Image
+            source={{
+              uri: 'https://avatars3.githubusercontent.com/u/17571969?s=400&v=4',
+            }}
+            style={{
+              width: size,
+              height: size,
+            }}
+          />
+        )}
+      >
+        There was a problem processing a transaction on your credit card.
+      </Banner>
+
       <ImageBackground source={require('../assets/patas.png')} style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Text style={styles.title}>
-            Em seguida, solicitamos que você registre seu cachorro.          </Text>
+            Em seguida, solicitamos que você registre seu cachorro.
+          </Text>
           <View>
             <TextInput
               label="Apelido"
               value={nickname}
               onChangeText={setNickname}
               style={styles.input}
+              theme={{ colors: { primary: '#900C0A' } }}
             />
             <View style={styles.row}>
               <TextInput
                 label="Data de Nascimento"
                 value={birthDate}
-                onChangeText={text => setBirthDate(text)}
+                onChangeText={setBirthDate}
                 style={[styles.input, styles.halfInput]}
+                theme={{ colors: { primary: '#900C0A' } }}
               />
               <TextInput
                 label="Peso"
                 value={weight}
-                onChangeText={text => setWeight(text)}
+                onChangeText={setWeight}
                 style={[styles.input, styles.halfInput, styles.peso]}
+                theme={{ colors: { primary: '#900C0A' } }}
               />
+              <TextInput
+              label="Senha"
+              value={password}
+              onChangeText={setPassword}
+              style={styles.input}
+              secureTextEntry
+              theme={{ colors: { primary: '#900C0A' } }}
+            />
             </View>
             <View style={styles.pickerContainer}>
               <Text style={styles.pickerLabel}>Porte</Text>
               <Picker
                 selectedValue={size}
-                onValueChange={(itemValue) => setSize(itemValue)}
+                onValueChange={setSize}
                 style={styles.picker}
                 mode="dialog"
               >
@@ -87,26 +123,39 @@ export default function Formulario() {
                 <Picker.Item label="Grande" value="Grande" />
               </Picker>
             </View>
-            <Button mode='text' labelStyle={{ color: '#fff' }} onPress={showModal}>Por que usar essas informações?</Button>
-
+            <Button mode="text" labelStyle={{ color: '#fff' }} onPress={showModal}>
+              Por que usar essas informações?
+            </Button>
           </View>
           <View>
-            <Button mode="contained" style={styles.button} labelStyle={{ color: '#1E1E1E' }} onPress={handleSubmit}>Finalizar</Button>
+            <Button
+              mode="contained"
+              style={styles.button}
+              labelStyle={{ color: '#1E1E1E' }}
+              onPress={handleSubmit}
+            >
+              Finalizar
+            </Button>
           </View>
+
+          {/* Modal Portal */}
           <Portal>
             {visible && (
               <TouchableWithoutFeedback onPress={hideModal}>
-                <Animated.View style={[styles.overlay, { backgroundColor: theme.colors.backdrop, opacity: animation }]}>
+                <Animated.View
+                  style={[styles.overlay, { backgroundColor: theme.colors.backdrop, opacity: animation }]}
+                >
                   <TouchableWithoutFeedback>
                     <Animated.View style={[styles.modalView, { opacity: animation }]}>
-                      <Text style={styles.modalTitle}>
-                        Proposito
-                      </Text>
+                      <Text style={styles.modalTitle}>Proposito</Text>
                       <Text style={styles.modalText}>
-                        Essas informações permitem uma abordagem eficaz no cuidado dos cães, garantindo que o monitoramento e as intervenções sejam o mais adequadas possível.
+                        Essas informações permitem uma abordagem eficaz no cuidado dos cães, garantindo que o
+                        monitoramento e as intervenções sejam o mais adequadas possível.
                       </Text>
                       <View style={styles.modalButtonContainer}>
-                        <Button mode="contained" onPress={hideModal} style={styles.modalButton}>Voltar</Button>
+                        <Button mode="contained" onPress={hideModal} style={styles.modalButton}>
+                          Voltar
+                        </Button>
                       </View>
                     </Animated.View>
                   </TouchableWithoutFeedback>
@@ -121,9 +170,6 @@ export default function Formulario() {
 }
 
 const styles = StyleSheet.create({
-  Provider: {
-    fontFamily: 'Poppins_400Regular',
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -134,32 +180,14 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'space-between',
   },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
   title: {
     fontSize: 40,
     fontWeight: 'bold',
     color: '#FFF',
     fontFamily: 'Poppins_700Bold',
   },
- 
- 
   input: {
-    backgroundColor: '#FFF',
     marginBottom: 16,
-    fontFamily: 'Poppins_400Regular',
   },
   peso: {
     width: '30%',
@@ -193,11 +221,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#49454F',
   },
-  link: {
-    color: '#FFF',
-    textDecorationLine: 'underline',
-    marginBottom: 16,
-  },
   button: {
     marginTop: 16,
     backgroundColor: '#FFF',
@@ -206,6 +229,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalTitle: {
     fontSize: 24,

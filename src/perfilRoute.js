@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from "react";
-import {
-  Text,
-  StyleSheet,
-  View,
-  ScrollView,
-  ImageBackground,
-  LayoutAnimation,
-  Platform,
-  UIManager,
-  Alert,
-  button,
-} from "react-native";
-import { Provider, List, Appbar, Icon, Button } from "react-native-paper";
+import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager, Alert } from "react-native";
+import { Provider, List, Appbar, Icon, Button, FAB, Portal } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { doc, onSnapshot, collection } from "firebase/firestore";
 import { firestore, auth } from "./firebaseConfig";
 
 const PerfilRoute = () => {
+
+  //FAB
+
+  const [state, setState] = React.useState({ open: false });
+
+  const onStateChange = ({ open }) => setState({ open });
+
+  const { open } = state;
+
   const navigation = useNavigation();
   const [expanded, setExpanded] = useState(false);
   const [selectedDog, setSelectedDog] = useState(null);
@@ -235,10 +233,49 @@ const PerfilRoute = () => {
               </View>
             </View>
           ))}
-      <View style={styles.deleteAccountContainer}>
-        <Button mode="contained" icon="logout" onPress={handleLogout} style={styles.button} labelStyle={styles.label}>Sair da Conta</Button>
-        <Button mode="contained" icon="delete" onPress={handleDeleteAccount} style={styles.button} labelStyle={styles.label} >Excluir Conta</Button>
-      </View>
+        <View style={styles.deleteAccountContainer}>
+
+        <Portal>
+      <FAB.Group
+        theme={{
+          colors: {
+            primary: 'green',  // Cor do ícone quando o FAB está fechado
+            onPrimary: 'white', // Cor do ícone quando o FAB está aberto
+          },
+        }}
+        open={open}
+        visible={true} // Ação para tornar o FAB visível
+        icon={open ? 'calendar-today' : 'plus'}
+        actions={[
+          {
+            icon: 'logout',
+            label: 'Sair',
+            onPress: () => console.log('Pressed logout'),
+          },
+          {
+            icon: 'delete',
+            label: 'Excluir Conta',
+            onPress: () => console.log('Pressed delete'),
+          },
+        ]}
+        onStateChange={onStateChange}
+        onPress={() => {
+          if (open) {
+            // Ação quando o FAB estiver aberto
+            console.log('FAB open, additional actions...');
+          } else {
+            // Ação quando o FAB estiver fechado
+            console.log('FAB closed');
+          }
+        }}
+      />
+    </Portal>
+
+
+
+          {/* <Button mode="contained" icon="logout" onPress={handleLogout} style={styles.button} labelStyle={styles.label}>Sair da Conta</Button>
+        <Button mode="contained" icon="delete" onPress={handleDeleteAccount} style={styles.button} labelStyle={styles.label} >Excluir Conta</Button> */}
+        </View>
       </ScrollView>
     </Provider>
   );
@@ -341,16 +378,17 @@ const styles = StyleSheet.create({
     right: 0,
     margin: 16,
   },
-  heartContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-  },
+
   bpmText: {
     paddingHorizontal: 10,
     paddingVertical: 19,
-    fontSize: 24,
+    fontSize: 32,
     color: "#232323",
+  },
+  bpmLabel: {
+    gap: 24,
+    display: 'flex',
+    marginLeft: 8,
   },
   deleteAccountContainer: {
     marginTop: 20,
