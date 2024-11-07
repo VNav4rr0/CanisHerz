@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager } from "react-native";
 import { Button, Modal, Portal, Provider, List, Icon } from 'react-native-paper';
+import { firestore, auth } from "./firebaseConfig";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -10,7 +12,42 @@ const MedidorRoute = () => {
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [selectedDog, setSelectedDog] = useState(null);
+  const [beatAvg, setBeatAvg] = useState(null); // Armazena o valor de beatAvg
+  const [userId, setUserId] = useState(null);
   const [dogs, setDogs] = useState([]);
+
+  const getUserId = () => {
+    const user = auth.currentUser;
+    if (user) {
+      setUserId(user.uid); // Atualiza o userId com o id do usuário logado
+    }
+  };
+
+  const fetchCardioData = () => {
+    if (!userId) return; // Verifica se o userId está disponível
+
+    const devicesRef = collection(firestore, "DispositivosCanis");
+    const q = query(devicesRef, where("userID", "==", userId));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        if (snapshot.empty) {
+          setBeatAvg(null); // Caso não haja dados, limpa o valor de beatAvg
+        } else {
+          snapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            setBeatAvg(data.beatAvg || null); // Armazena o valor de beatAvg
+          });
+        }
+      },
+      (error) => {
+        console.error("Erro ao buscar os dados:", error);
+      }
+    );
+
+    return unsubscribe;
+  };
 
   const fetchDogs = async () => {
     const fetchedDogs = ["Pitico", "Thor", "Max"];
@@ -18,8 +55,16 @@ const MedidorRoute = () => {
   };
 
   useEffect(() => {
+    getUserId(); // Chama a função para obter o userId
+
+    const unsubscribeCardio = fetchCardioData(); // Chama a função para buscar os dados de batimentos
+
+    return () => {
+      if (unsubscribeCardio) unsubscribeCardio(); // Cancela a escuta ao desmontar o componente
+    };
+
     fetchDogs();
-  }, []);
+  }, [userId]);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
@@ -81,7 +126,7 @@ const MedidorRoute = () => {
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
             <Text style={styles.bpmLabel}>BPM</Text>
-              <Text style={styles.bpmText}>60</Text>
+              <Text style={styles.bpmText}>{beatAvg !== null ? beatAvg : "Carregando..."}</Text>
               <View style={styles.iconC}>
                 <Icon
                   source="heart"

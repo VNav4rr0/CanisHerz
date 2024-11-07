@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ImageBackground } from 'react-native';
 import { Button, Provider, IconButton, Card, Icon } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { auth } from './firebaseConfig'; // Certifique-se de que o caminho está correto
+import { auth } from './firebaseConfig';
 
 const HomeRoute = () => {
-  const [batteryPercentage, setBatteryPercentage] = useState(100);// Porcentagem inicial da bateria
+  const [batteryPercentage, setBatteryPercentage] = useState(100); // Porcentagem inicial da bateria
+  const [userName, setUserName] = useState('');
+  const navigation = useNavigation();
 
+  // Função para navegar até a tela de selecionar dispositivo
   const setDevice = () => {
     navigation.navigate('SelecionarDispositivo');
   };
 
-  // Função para deduzir a porcentagem da bateria
+  // Função para deduzir a porcentagem da bateria (não utilizada no código atual)
   const reduceBattery = (amount) => {
     setBatteryPercentage((prev) => Math.max(prev - amount, 0)); // Deduza a bateria mas não abaixo de 0
   };
@@ -21,36 +24,21 @@ const HomeRoute = () => {
     let icon = "";
     let color = "";
 
-    if (batteryPercentage > 100) {
+    if (batteryPercentage > 80) {
       icon = "battery";
       color = "#009951"; // Verde
-    } else if (batteryPercentage > 90) {
-      icon = "battery";
-      color = "#009951"; // Verde
-    } else if (batteryPercentage > 80) {
-      icon = "battery-80";
-      color = "#009951"; // Verde
-    } else if (batteryPercentage > 70) {
-      icon = "battery-70";
-      color = "#009951"; // Amarelo-Verde
     } else if (batteryPercentage > 60) {
-      icon = "battery-60";
-      color = "#009951"; // Amarelo-Verde
-    } else if (batteryPercentage > 50) {
-      icon = "battery-50";
-      color = "#009951"; // Amarelo
+      icon = "battery-80";
+      color = "#8BC34A"; // Amarelo-Verde
     } else if (batteryPercentage > 40) {
-      icon = "battery-40";
-      color = "#009951"; // Amarelo
-    } else if (batteryPercentage > 30) {
-      icon = "battery-30";
-      color = "#009951"; // Laranja
+      icon = "battery-50";
+      color = "#FFEB3B"; // Amarelo
     } else if (batteryPercentage > 20) {
-      icon = "battery-20";
-      color = "#009951"; // Laranja
+      icon = "battery-30";
+      color = "#FF9800"; // Laranja
     } else if (batteryPercentage > 10) {
       icon = "battery-10";
-      color = "#E8B931"; // Vermelho
+      color = "#FF5722"; // Vermelho
     } else {
       icon = "battery-alert";
       color = "#E8B931"; // Vermelho Crítico
@@ -61,12 +49,15 @@ const HomeRoute = () => {
 
   const { icon, color } = getBatteryIconAndColor();
 
-  // useEffect para obter e logar o ID do usuário
+  // useEffect para obter o ID do usuário autenticado
   useEffect(() => {
     const user = auth.currentUser; // Obtém o usuário atual
     if (user) {
+      setUserName(user.displayName || 'Usuário'); // Define o nome do usuário, se disponível
     } else {
       console.log("Nenhum usuário autenticado.");
+      // Caso não esteja autenticado, você pode redirecionar para a tela de login
+      // navigation.navigate('Login');
     }
   }, []);
 
@@ -96,7 +87,6 @@ const HomeRoute = () => {
               </Card.Content>
             </Card>
             <Button buttonColor="#BE0C12" mode="contained" onPress={setDevice}>Parear</Button>
-            
           </View>
           <View style={styles.column}>
             <Card mode='outlined' style={[styles.cont, { backgroundColor: '#FFF8F7', width: '100%', borderRadius: 32 }]}>
@@ -181,6 +171,11 @@ const styles = StyleSheet.create({
     width: '50%',
     height: '100%',
     justifyContent: 'space-between',
+  },
+  card: {
+    width: '100%',
+    backgroundColor: '#FFF8F7',
+    borderRadius: 24,
   },
 });
 

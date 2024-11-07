@@ -1,21 +1,26 @@
-// DeviceSelection.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { db, auth } from './firebaseConfig'; // Certifique-se de que auth está importado
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { firestore, auth } from './firebaseConfig'; // Certifique-se de que auth e firestore estão importados corretamente
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SelecionarDispositivo({ navigation }) {
   const [devices, setDevices] = useState([]);
 
+  // Função para buscar os dispositivos
   useEffect(() => {
     const fetchDevices = async () => {
-      const querySnapshot = await getDocs(collection(db, 'DispositivosCanis'));
-      setDevices(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      try {
+        const querySnapshot = await firestore.collection('DispositivosCanis').get();
+        setDevices(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (error) {
+        console.error("Erro ao buscar dispositivos:", error);
+        Alert.alert("Erro", "Não foi possível carregar os dispositivos.");
+      }
     };
     fetchDevices();
   }, []);
 
+  // Função para lidar com a seleção do dispositivo
   const handleDeviceSelect = async (device) => {
     const user = auth.currentUser; // Obtém o usuário autenticado
     if (!user) {
@@ -25,7 +30,7 @@ export default function SelecionarDispositivo({ navigation }) {
 
     try {
       // Atualiza o documento do dispositivo, anexando o userID
-      await updateDoc(doc(db, "DispositivosCanis", device.id), {
+      await firestore.collection('DispositivosCanis').doc(device.id).update({
         userID: user.uid, // Anexa o userID ao dispositivo
       });
 
