@@ -1,83 +1,193 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ImageBackground } from 'react-native';
-import { Button, Provider, IconButton, Card, Icon } from 'react-native-paper';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Image, ImageBackground, Modal, SafeAreaView, Animated } from 'react-native';
+import { Button, Provider, IconButton, Card, Icon, Portal, Dialog, SegmentedButtons, List } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from './firebaseConfig';
 
 const HomeRoute = () => {
-  const [batteryPercentage, setBatteryPercentage] = useState(100); // Porcentagem inicial da bateria
+
+  // thema 
+
+  const customTheme = {
+    colors: {
+      primary: "rgb(180, 39, 31)",
+      onPrimary: "rgb(255, 255, 255)",
+      primaryContainer: "rgb(255, 218, 213)",
+      onPrimaryContainer: "rgb(65, 0, 1)",
+      secondary: "rgb(156, 65, 64)",
+      onSecondary: "rgb(255, 255, 255)",
+      secondaryContainer: "#F9DEDC",
+      onSecondaryContainer: "rgb(65, 0, 5)",
+      tertiary: "rgb(112, 92, 46)",
+      onTertiary: "rgb(255, 255, 255)",
+      tertiaryContainer: "rgb(252, 223, 166)",
+      onTertiaryContainer: "rgb(38, 26, 0)",
+      error: "rgb(186, 26, 26)",
+      onError: "rgb(255, 255, 255)",
+      errorContainer: "rgb(255, 218, 214)",
+      onErrorContainer: "rgb(65, 0, 2)",
+      background: "rgb(255, 251, 255)",
+      onBackground: "rgb(32, 26, 25)",
+      surface: "rgb(255, 251, 255)",
+      onSurface: "rgb(32, 26, 25)",
+      surfaceVariant: "rgb(245, 221, 218)",
+      onSurfaceVariant: "rgb(83, 67, 65)",
+      outline: "rgb(133, 115, 112)",
+      outlineVariant: "rgb(216, 194, 190)",
+      shadow: "rgb(0, 0, 0)",
+      scrim: "rgb(0, 0, 0)",
+      inverseSurface: "rgb(54, 47, 46)",
+      inverseOnSurface: "rgb(251, 238, 236)",
+      inversePrimary: "rgb(255, 180, 170)",
+      elevation: {
+        level0: "transparent",
+        level1: "rgb(251, 240, 244)",
+        level2: "rgb(249, 234, 237)",
+        level3: "rgb(247, 228, 230)",
+        level4: "rgb(246, 226, 228)",
+        level5: "rgb(245, 221, 224)"
+      },
+      surfaceDisabled: "rgba(32, 26, 25, 0.12)",
+      onSurfaceDisabled: "rgba(32, 26, 25, 0.38)",
+      backdrop: "rgba(59, 45, 43, 0.4)"
+    }
+  };
+  
+  const [batteryPercentage, setBatteryPercentage] = useState(100);
   const [userName, setUserName] = useState('');
+  const [visible, setVisible] = useState(false);
+  const [value, setValue] = useState('cadastrados'); // Valor inicial para o SegmentedButtons
   const navigation = useNavigation();
 
-  // Função para navegar até a tela de selecionar dispositivo
-  const setDevice = () => {
-    navigation.navigate('SelecionarDispositivo');
-  };
+  const opacity = useRef(new Animated.Value(1)).current; // Valor de opacidade inicial para a animação
 
-  // Função para deduzir a porcentagem da bateria (não utilizada no código atual)
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
+
   const reduceBattery = (amount) => {
-    setBatteryPercentage((prev) => Math.max(prev - amount, 0)); // Deduza a bateria mas não abaixo de 0
+    setBatteryPercentage((prev) => Math.max(prev - amount, 0)); // Reduce battery but not below 0
   };
 
-  // Função para obter o ícone e a cor com base na porcentagem da bateria
   const getBatteryIconAndColor = () => {
     let icon = "";
     let color = "";
 
-    if (batteryPercentage > 80) {
+    if (batteryPercentage > 90) {
       icon = "battery";
-      color = "#009951"; // Verde
-    } else if (batteryPercentage > 60) {
+      color = "#00FF00"; // Verde
+    } else if (batteryPercentage > 90) {
+      icon = "battery-90";
+      color = "#00FF00"; // Verde
+    } else if (batteryPercentage > 80) {
       icon = "battery-80";
-      color = "#8BC34A"; // Amarelo-Verde
-    } else if (batteryPercentage > 40) {
+      color = "#00FF00"; // Verde
+    } else if (batteryPercentage > 70) {
+      icon = "battery-70";
+      color = "#ADFF2F"; // Amarelo-Verde
+    } else if (batteryPercentage > 60) {
+      icon = "battery-60";
+      color = "#ADFF2F"; // Amarelo-Verde
+    } else if (batteryPercentage > 50) {
       icon = "battery-50";
-      color = "#FFEB3B"; // Amarelo
-    } else if (batteryPercentage > 20) {
+      color = "#FFD700"; // Amarelo
+    } else if (batteryPercentage > 40) {
+      icon = "battery-40";
+      color = "#FFD700"; // Amarelo
+    } else if (batteryPercentage > 30) {
       icon = "battery-30";
-      color = "#FF9800"; // Laranja
+      color = "#FFA500"; // Laranja
+    } else if (batteryPercentage > 20) {
+      icon = "battery-20";
+      color = "#FFA500"; // Laranja
     } else if (batteryPercentage > 10) {
       icon = "battery-10";
-      color = "#FF5722"; // Vermelho
+      color = "#FF4500"; // Vermelho
     } else {
       icon = "battery-alert";
-      color = "#E8B931"; // Vermelho Crítico
+      color = "#FF0000"; // Vermelho Crítico
     }
 
     return { icon, color };
   };
 
   const { icon, color } = getBatteryIconAndColor();
+  // Função para animação de opacidade
+  const animateView = () => {
+    Animated.sequence([
+      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+    ]).start();
+  };
 
-  // useEffect para obter o ID do usuário autenticado
+  // useEffect para alterar a view com animação sempre que `value` muda
   useEffect(() => {
-    const user = auth.currentUser; // Obtém o usuário atual
-    if (user) {
-      setUserName(user.displayName || 'Usuário'); // Define o nome do usuário, se disponível
-    } else {
-      console.log("Nenhum usuário autenticado.");
-      // Caso não esteja autenticado, você pode redirecionar para a tela de login
-      // navigation.navigate('Login');
-    }
-  }, []);
+    animateView();
+  }, [value]);
 
   return (
-    <Provider>
-      <ImageBackground 
-        style={[styles.capa, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }]} 
+    <Provider theme={customTheme}>
+      <ImageBackground
+        style={[styles.capa, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }]}
         source={require('../assets/capa3.png')}
       >
         <View style={styles.imgContainer}>
-          <Image 
-            style={styles.dog} 
-            source={require('../assets/dog.png')} 
-          />
+          <Image style={styles.dog} source={require('../assets/dog.png')} />
         </View>
       </ImageBackground>
       <View style={styles.container}>
+        <Portal>
+          <Modal visible={visible} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Dialog.Icon icon="alert" />
+                <Dialog.Title style={[{ textAlign: 'center' }]}>This is a title</Dialog.Title>
+                <Dialog.Content>
+                  <SegmentedButtons
+                    value={value}
+                    onValueChange={(newValue) => setValue(newValue)}
+                    buttons={[
+                      { value: 'cadastrados', label: 'Cadastrados' },
+                      { value: 'naoCadastrados', label: 'Desconhecidos' },
+                    ]}
+                  />
+                  <Animated.View style={{ opacity }}>
+                    {value === 'cadastrados' ? (
+                      <View style={styles.modalArea}>
+                        <List.Item
+                          title="First Item"
+                          description="Item description"
+                          left={props => <List.Icon {...props} icon="folder" />}
+                          onPress={() => {
+                            // Adicione aqui a lógica que deseja para este item
+                            hideModal(); // Fecha o modal ao clicar no item
+                          }}
+                        />
+                      </View>
+                    ) : (
+                      <View style={styles.modalArea}>
+                        <List.Item
+                          title="First Item"
+                          description="Item description"
+                          left={props => <List.Icon {...props} icon="folder" />}
+                          onPress={() => {
+                            // Adicione aqui a lógica que deseja para este item
+                            hideModal(); // Fecha o modal ao clicar no item
+                          }}
+                        />
+                      </View>
+                    )}
+                  </Animated.View>
+                </Dialog.Content>
+                <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
+                  Voltar
+                </Button>
+              </View>
+            </View>
+          </Modal>
+        </Portal>
         <View style={styles.row}>
           <View style={styles.column2}>
-            <Card mode='outlined' style={[styles.card, { height: 140, backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
+            <Card mode="outlined" style={[styles.card, { height: 140, backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
               <Card.Title
                 title="Dispositivo"
                 right={(props) => <IconButton {...props} icon="access-point-off" size={24} />}
@@ -86,10 +196,12 @@ const HomeRoute = () => {
                 <Text style={{ fontSize: 25 }}>Não Conectado</Text>
               </Card.Content>
             </Card>
-            <Button buttonColor="#BE0C12" mode="contained" onPress={setDevice}>Parear</Button>
+            <Button buttonColor="#BE0C12" mode="contained" onPress={showModal}>
+              Parear
+            </Button>
           </View>
           <View style={styles.column}>
-            <Card mode='outlined' style={[styles.cont, { backgroundColor: '#FFF8F7', width: '100%', borderRadius: 32 }]}>
+            <Card mode="outlined" style={[styles.cont, { backgroundColor: '#FFF8F7', width: '100%', borderRadius: 32 }]}>
               <Card.Content style={styles.conteu}>
                 <Text style={styles.fontBa}>{batteryPercentage}%</Text>
                 <Icon source={icon} size={64} color={color} />
@@ -97,7 +209,7 @@ const HomeRoute = () => {
             </Card>
           </View>
         </View>
-        <Card mode='outlined' style={[styles.card, { width: "100%", backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
+        <Card mode="outlined" style={[styles.card, { width: '100%', backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
           <Card.Title title="Aviso" />
           <Card.Content>
             <Text style={{ fontSize: 20 }}>Se houver outro canino, adicione-o na página 'Conta' do app.</Text>
@@ -177,6 +289,44 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF8F7',
     borderRadius: 24,
   },
+
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo escurecido
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    width: '90%',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  modalContent: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalArea: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFF8F7',
+    padding: 16,
+    marginTop: 16,
+    borderRadius: 16,
+  },
+  closeButton: {
+    backgroundColor: '#BE0C12',
+    marginTop: 20,
+  },
 });
 
 export default HomeRoute;
+
+

@@ -7,7 +7,50 @@ import { firestore, auth } from "./firebaseConfig";
 
 const PerfilRoute = () => {
 
-  //FAB
+  const customTheme = {
+    colors: {
+      primary: "rgb(180, 39, 31)",
+      onPrimary: "rgb(255, 255, 255)",
+      primaryContainer: "rgb(255, 218, 213)",
+      onPrimaryContainer: "rgb(65, 0, 1)",
+      secondary: "rgb(156, 65, 64)",
+      onSecondary: "rgb(255, 255, 255)",
+      secondaryContainer: "#F9DEDC",
+      onSecondaryContainer: "rgb(65, 0, 5)",
+      tertiary: "rgb(112, 92, 46)",
+      onTertiary: "rgb(255, 255, 255)",
+      tertiaryContainer: "rgb(252, 223, 166)",
+      onTertiaryContainer: "rgb(38, 26, 0)",
+      error: "rgb(186, 26, 26)",
+      onError: "rgb(255, 255, 255)",
+      errorContainer: "rgb(255, 218, 214)",
+      onErrorContainer: "rgb(65, 0, 2)",
+      background: "rgb(255, 251, 255)",
+      onBackground: "rgb(32, 26, 25)",
+      surface: "rgb(255, 251, 255)",
+      onSurface: "rgb(32, 26, 25)",
+      surfaceVariant: "rgb(245, 221, 218)",
+      onSurfaceVariant: "rgb(83, 67, 65)",
+      outline: "rgb(133, 115, 112)",
+      outlineVariant: "rgb(216, 194, 190)",
+      shadow: "rgb(0, 0, 0)",
+      scrim: "rgb(0, 0, 0)",
+      inverseSurface: "rgb(54, 47, 46)",
+      inverseOnSurface: "rgb(251, 238, 236)",
+      inversePrimary: "rgb(255, 180, 170)",
+      elevation: {
+        level0: "transparent",
+        level1: "rgb(251, 240, 244)",
+        level2: "rgb(249, 234, 237)",
+        level3: "rgb(247, 228, 230)",
+        level4: "rgb(246, 226, 228)",
+        level5: "rgb(245, 221, 224)"
+      },
+      surfaceDisabled: "rgba(32, 26, 25, 0.12)",
+      onSurfaceDisabled: "rgba(32, 26, 25, 0.38)",
+      backdrop: "rgba(59, 45, 43, 0.4)"
+    }
+  };
 
   const [state, setState] = React.useState({ open: false });
 
@@ -154,7 +197,7 @@ const PerfilRoute = () => {
   };
 
   return (
-    <Provider>
+    <Provider theme={customTheme}>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         <ImageBackground
           source={require("../assets/header.png")}

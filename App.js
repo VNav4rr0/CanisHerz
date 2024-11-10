@@ -23,6 +23,8 @@ const Stack = createNativeStackNavigator();
 
 SplashScreen.preventAutoHideAsync(); // Impede que a splash screen feche automaticamente
 
+
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +45,7 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+
   
   return (
     <PaperProvider>
