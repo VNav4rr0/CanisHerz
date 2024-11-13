@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, ImageBackground, Modal, SafeAreaView, Animated } from 'react-native';
+import { View, Text, StyleSheet, Image, ImageBackground, Modal, SafeAreaView, Animated, Alert, FlatList, TouchableOpacity} from 'react-native';
 import { Button, Provider, IconButton, Card, Icon, Portal, Dialog, SegmentedButtons, List } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import { auth } from './firebaseConfig';
+import { firestore, auth } from './firebaseConfig';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 const HomeRoute = () => {
 
@@ -54,11 +54,9 @@ const HomeRoute = () => {
   };
   
   const [batteryPercentage, setBatteryPercentage] = useState(100);
-  const [userName, setUserName] = useState('');
   const [visible, setVisible] = useState(false);
   const [value, setValue] = useState('cadastrados'); // Valor inicial para o SegmentedButtons
-  const navigation = useNavigation();
-
+  const [devices, setDevices] = useState([]);
   const opacity = useRef(new Animated.Value(1)).current; // Valor de opacidade inicial para a animação
 
   const showModal = () => setVisible(true);
@@ -67,6 +65,8 @@ const HomeRoute = () => {
   const reduceBattery = (amount) => {
     setBatteryPercentage((prev) => Math.max(prev - amount, 0)); // Reduce battery but not below 0
   };
+
+  
 
   const getBatteryIconAndColor = () => {
     let icon = "";
@@ -124,6 +124,37 @@ const HomeRoute = () => {
     animateView();
   }, [value]);
 
+  const fetchDevices = async () => {
+    try {
+      const querySnapshot = await firestore.collection('DispositivosCanis').get();
+      setDevices(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    } catch (error) {
+      console.error("Erro ao buscar dispositivos:", error);
+      Alert.alert("Erro", "Não foi possível carregar os dispositivos.");
+    }
+  };
+
+  // Função de seleção de dispositivo
+  const handleDeviceSelect = async (device) => {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Erro", "Usuário não autenticado.");
+      return;
+    }
+
+    try {
+      await firestore.collection('DispositivosCanis').doc(device.id).update({
+        userID: user.uid,
+      });
+
+      Alert.alert("Sucesso", "Dispositivo cadastrado com sucesso!");
+      hideModal(); // Fecha o modal ao concluir a seleção
+    } catch (error) {
+      console.error("Erro ao cadastrar dispositivo:", error);
+      Alert.alert("Erro", "Não foi possível cadastrar o dispositivo.");
+    }
+  };
+
   return (
     <Provider theme={customTheme}>
       <ImageBackground
@@ -136,11 +167,11 @@ const HomeRoute = () => {
       </ImageBackground>
       <View style={styles.container}>
         <Portal>
-          <Modal visible={visible} transparent animationType="fade">
+          <Modal visible={visible} transparent animationType="fade" onShow={fetchDevices}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalContainer}>
                 <Dialog.Icon icon="alert" />
-                <Dialog.Title style={[{ textAlign: 'center' }]}>This is a title</Dialog.Title>
+                <Dialog.Title style={[{ textAlign: 'center' }]}>Selecione seu Dispositivo</Dialog.Title>
                 <Dialog.Content>
                   <SegmentedButtons
                     value={value}
@@ -150,33 +181,45 @@ const HomeRoute = () => {
                       { value: 'naoCadastrados', label: 'Desconhecidos' },
                     ]}
                   />
-                  <Animated.View style={{ opacity }}>
-                    {value === 'cadastrados' ? (
+                <Animated.View style={{ opacity }}>
+                {value === 'cadastrados' ? (
+                  <FlatList
+                    data={devices.filter(device => device.userID === auth.currentUser?.uid)}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
                       <View style={styles.modalArea}>
                         <List.Item
-                          title="First Item"
-                          description="Item description"
-                          left={props => <List.Icon {...props} icon="folder" />}
+                          title={`MAC: ${item.macAddress}`}
+                          description={`Battery Level: ${item.batteryLevel || 'N/A'}`}
+                          left={(props) => <List.Icon {...props} icon="folder" />}
                           onPress={() => {
-                            // Adicione aqui a lógica que deseja para este item
-                            hideModal(); // Fecha o modal ao clicar no item
-                          }}
-                        />
-                      </View>
-                    ) : (
-                      <View style={styles.modalArea}>
-                        <List.Item
-                          title="First Item"
-                          description="Item description"
-                          left={props => <List.Icon {...props} icon="folder" />}
-                          onPress={() => {
-                            // Adicione aqui a lógica que deseja para este item
-                            hideModal(); // Fecha o modal ao clicar no item
+                            handleDeviceSelect(item);
+                            hideModal();
                           }}
                         />
                       </View>
                     )}
-                  </Animated.View>
+                  />
+                ) : (
+                  <FlatList
+                    data={devices.filter(device => !device.userID)}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                      <View style={styles.modalArea}>
+                        <List.Item
+                          title={`MAC: ${item.macAddress}`}
+                          description={`Battery Level: ${item.batteryLevel || 'N/A'}`}
+                          left={(props) => <List.Icon {...props} icon="folder" />}
+                          onPress={() => {
+                            handleDeviceSelect(item);
+                            hideModal();
+                          }}
+                        />
+                      </View>
+                    )}
+                  />
+                )}
+              </Animated.View>
                 </Dialog.Content>
                 <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
                   Voltar

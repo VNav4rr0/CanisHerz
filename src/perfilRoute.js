@@ -78,17 +78,18 @@ const PerfilRoute = () => {
     if (user) {
       const userId = user.uid;
       const docRef = doc(firestore, "Tutores", userId);
-
+  
       // Use onSnapshot to listen for changes in the tutor document
       onSnapshot(
         docRef,
         (docSnap) => {
           if (docSnap.exists()) {
-            setTutorName(docSnap.data().Nome || "Usuário");
+            setTutorName(docSnap.data().Nome || "Usuário"); // Nome ou valor padrão
           }
         },
         (error) => {
           console.error("Error fetching tutor data:", error);
+          setTutorName("Usuário"); // Em caso de erro, definir um nome padrão
         }
       );
     }
@@ -150,55 +151,64 @@ const PerfilRoute = () => {
     navigation.navigate("AddNovosDogs");
   };
 
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+
   const handleLogout = () => {
     auth
       .signOut()
       .then(() => {
         Alert.alert("Sucesso", "Você saiu da conta.");
-        navigation.navigate("Login"); // Redirecionar para a tela de login
+        navigation.navigate("Login");
       })
       .catch((error) => {
         Alert.alert("Erro", error.message);
       });
   };
 
-  const handleDeleteAccount = () => {
+
+  const promptForPassword = () => {
+    Alert.prompt(
+      "Confirme com sua senha",
+      "Digite sua senha para confirmar a exclusão da conta",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          onPress: (enteredPassword) => reauthenticateAndDelete(enteredPassword),
+        },
+      ],
+      "secure-text"
+    );
+  };
+
+  const reauthenticateAndDelete = (enteredPassword) => {
     const user = auth.currentUser;
-    if (user) {
-      Alert.alert(
-        "Confirmação",
-        "Você tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.",
-        [
-          {
-            text: "Cancelar",
-            style: "cancel",
-          },
-          {
-            text: "Excluir",
-            onPress: () => {
-              user
-                .delete()
-                .then(() => {
-                  Alert.alert(
-                    "Conta excluída",
-                    "Sua conta foi excluída com sucesso."
-                  );
-                  navigation.navigate("Login"); // Redirecionar para a tela de login
-                })
-                .catch((error) => {
-                  Alert.alert("Erro", error.message);
-                });
-            },
-          },
-        ],
-        { cancelable: false }
-      );
+
+    if (user && enteredPassword) {
+      const credential = EmailAuthProvider.credential(user.email, enteredPassword);
+
+      reauthenticateWithCredential(user, credential)
+        .then(() => {
+          user.delete().then(() => {
+            Alert.alert("Conta excluída", "Sua conta foi excluída com sucesso.");
+            navigation.navigate("Login");
+          });
+        })
+        .catch((error) => {
+          console.error("Erro de autenticação:", error);
+          Alert.alert("Erro", "Senha incorreta. Por favor, tente novamente.");
+        });
+    } else {
+      Alert.alert("Erro", "Não foi possível autenticar o usuário.");
     }
   };
 
   return (
     <Provider theme={customTheme}>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        
         <ImageBackground
           source={require("../assets/header.png")}
           style={styles.headerBackground}
@@ -293,7 +303,7 @@ const PerfilRoute = () => {
           {
             icon: 'logout',
             label: 'Sair',
-            onPress: () => console.log('Pressed logout'),
+            onPress: (handleLogout) => console.log('Pressed logout'),
           },
           {
             icon: 'delete',
@@ -313,11 +323,8 @@ const PerfilRoute = () => {
         }}
       />
     </Portal>
-
-
-
-          {/* <Button mode="contained" icon="logout" onPress={handleLogout} style={styles.button} labelStyle={styles.label}>Sair da Conta</Button>
-        <Button mode="contained" icon="delete" onPress={handleDeleteAccount} style={styles.button} labelStyle={styles.label} >Excluir Conta</Button> */}
+          <Button mode="contained" icon="logout" onPress={handleLogout} style={styles.button} labelStyle={styles.label}>Sair da Conta</Button>
+        <Button mode="contained" icon="delete" onPress={promptForPassword} style={styles.button} labelStyle={styles.label} >Excluir Conta</Button>
         </View>
       </ScrollView>
     </Provider>

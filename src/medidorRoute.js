@@ -49,22 +49,52 @@ const MedidorRoute = () => {
     return unsubscribe;
   };
 
-  const fetchDogs = async () => {
-    const fetchedDogs = ["Pitico", "Thor", "Max"];
-    setDogs(fetchedDogs);
+  const fetchDogs = () => {
+    if (!userId) return; // Verifica se o userId está disponível
+  
+    // Referência à coleção de usuários
+    const userRef = firestore.collection('Tutores').doc(userId);
+  
+    // Referência à subcoleção de cães
+    const dogsRef = userRef.collection('Cachorros');
+  
+    const unsubscribe = dogsRef.onSnapshot((snapshot) => {
+      if (!snapshot.empty) {
+        const fetchedDogs = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            nome: data.Apelido,
+            nascimento: data.Nascimento,
+            peso: data.Peso,
+            porte: data.Porte
+          };
+        });
+        setDogs(fetchedDogs); // Atualiza o estado com os cães encontrados
+      } else {
+        setDogs([]); // Caso não haja cães, limpa a lista
+      }
+    }, (error) => {
+      console.error("Erro ao buscar cães:", error);
+    });
+  
+    // Retorna a função de unsubscribe para limpar a escuta quando o componente for desmontado
+    return unsubscribe;
   };
+  
 
   useEffect(() => {
     getUserId(); // Chama a função para obter o userId
-
+  
     const unsubscribeCardio = fetchCardioData(); // Chama a função para buscar os dados de batimentos
-
+    const unsubscribeDogs = fetchDogs(); // Inicia a escuta dos cães
+  
     return () => {
-      if (unsubscribeCardio) unsubscribeCardio(); // Cancela a escuta ao desmontar o componente
+      if (unsubscribeCardio) unsubscribeCardio(); // Cancela a escuta dos dados de batimentos
+      if (unsubscribeDogs) unsubscribeDogs(); // Cancela a escuta dos cães
     };
+  }, [userId]); 
 
-    fetchDogs();
-  }, [userId]);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
@@ -87,34 +117,36 @@ const MedidorRoute = () => {
           imageStyle={styles.headerImage}
         >
           <View style={styles.overlay}>
-            <Text style={styles.petName}>{selectedDog ? selectedDog : "Selecione um cão"}</Text>
+            <Text style={styles.petName}>{selectedDog ? selectedDog.nome : "Selecione um cão"}</Text>
           </View>
         </ImageBackground>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.petInfo}>Informações do Cão</Text>
-          <Text style={styles.petDetails}>Peso: NA</Text>
-          <Text style={styles.petDetails}>Iades: NA</Text>
+        <Text style={styles.petInfo}>Informações do Cão</Text>
+          <Text style={styles.petDetails}>Nome: {selectedDog ? selectedDog.nome : "NA"}</Text>
+          <Text style={styles.petDetails}>Nascimento: {selectedDog ? selectedDog.nascimento : "NA"}</Text>
+          <Text style={styles.petDetails}>Peso: {selectedDog ? selectedDog.peso : "NA"}</Text>
+          <Text style={styles.petDetails}>Porte: {selectedDog ? selectedDog.porte : "NA"}</Text>
         </View>
 
         <List.Section>
-          <List.Accordion
+          <List.Accordion  
             title="Cães cadastrados"
             expanded={expanded}
             onPress={handlePress}
             style={styles.customAccordion}
             titleStyle={styles.accordionTitle}
-            description={selectedDog ? `Cão selecionado: ${selectedDog}` : "Selecione um cão para medir os batimentos"}
+            description={selectedDog ? `Cão selecionado: ${selectedDog.nome}` : "Selecione um cão para medir os batimentos"}
           >
             <View style={styles.accordionItemContainer} >
               <ScrollView style={styles.accordionItemsScroll}>
                 {dogs.map((dog) => (
 
                   <List.Item
-                    key={dog}
-                    title={dog}
-                    style={styles.accordionItem}
-                    onPress={() => selectDog(dog)}
+                  key={dog.id}
+                  title={dog.nome}
+                  style={[styles.accordionItem, selectedDog?.id === dog.id && styles.selectedDog]}
+                  onPress={() => selectDog(dog)}
                   />
                 ))}
               </ScrollView>
@@ -126,7 +158,7 @@ const MedidorRoute = () => {
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
             <Text style={styles.bpmLabel}>BPM</Text>
-              <Text style={styles.bpmText}>{beatAvg !== null ? beatAvg : "Carregando..."}</Text>
+              <Text style={styles.bpmText}>{beatAvg !== null ? beatAvg : "Nenhum dado disponível"}</Text>
               <View style={styles.iconC}>
                 <Icon
                   source="heart"
@@ -216,6 +248,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#555',
   },
+
+  selectedDog: {
+    backgroundColor: '#F0F0F0', // ou qualquer cor para destacar
+  },
+
   customAccordion: {
     backgroundColor: '#FFF8F7',
     marginHorizontal: 20,
