@@ -32,18 +32,20 @@ export default function App() {
       setUser(currentUser);
       setIsLoading(false);
     });
-    return () => unsubscribe();
+
+    return () => unsubscribe(); // Cleanup para evitar leaks
   }, []);
 
   useEffect(() => {
     if (!isLoading) {
-      SplashScreen.hideAsync(); // Esconde a splash screen quando o estado de carregamento termina
+      SplashScreen.hideAsync().catch(() => {
+        console.log('Erro ao esconder Splash Screen');
+      }); // Tratar possíveis erros ao esconder a Splash Screen
     }
   }, [isLoading]);
 
   if (isLoading) {
-    // Retorna null enquanto a autenticação está carregando (Splash Screen visível)
-    return null;
+    return null; // Splash Screen visível
   }
 
   return (
@@ -52,29 +54,8 @@ export default function App() {
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
-            animation: 'ios',
-            transitionSpec: {
-              open: {
-                animation: 'timing',
-                config: {
-                  duration: 100,
-                },
-              },
-              close: {
-                animation: 'timing',
-                config: {
-                  duration: 100,
-                },
-              },
-            },
-            cardStyleInterpolator: ({ current }) => ({
-              cardStyle: {
-                opacity: current.progress,
-              },
-            }),
           }}
         >
-          {/* Rotas principais */}
           {user ? (
             <>
               <Stack.Screen name="Home" component={Home} />

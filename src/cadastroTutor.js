@@ -21,8 +21,8 @@ const CadastroTutor = () => {
 
                 // Armazenando dados adicionais no Firestore
                 await firestore.collection('Tutores').doc(userId).set({
-                    Nome: nome, 
                     Email: email,   
+                    Nome: nome, 
                 });
 
                 ToastAndroid.show("Cadastro realizado com sucesso!", ToastAndroid.SHORT);
