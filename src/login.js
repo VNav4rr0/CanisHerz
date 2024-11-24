@@ -25,11 +25,12 @@ export default function Login() {
 
   const handleSubmit = () => {
     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        navigation.navigate('Home');
+      .then(() => {
+        console.log('Login realizado com sucesso.');
+        // A navegação para 'Home' será controlada no App.js com base na autenticação
       })
       .catch((error) => {
-        console.error("Erro ao fazer login:", error);
+        console.error('Erro ao fazer login:', error.message);
       });
   };
 
