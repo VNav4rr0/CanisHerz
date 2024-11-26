@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Text, ImageBackground, ToastAndroid } from 'react-native';
 import { TextInput, Button, Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { auth, firestore } from './firebaseConfig'; // Certifique-se de que está importando corretamente
+import { auth, firestore } from './firebaseConfig'; 
+
 
 const CadastroTutor = () => {
     const [nome, setNome] = useState('');
