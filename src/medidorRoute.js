@@ -197,7 +197,7 @@ const MedidorRoute = () => {
           <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalContainer}>
             <Text style={styles.modalTitle}>Instruções</Text>
             <Text style={styles.modalContent}>
-              1. Mantenha o cão calmo: Evite estresse e mantenha-o em um ambiente tranquilo.
+              1. Mantenha o cachorro calmo: Evite estresse e mantenha-o em um ambiente tranquilo.
               {'\n\n'}
               2. Entre em contato com o veterinário: Leve o cão à clínica o mais rápido possível.
               {'\n\n'}
