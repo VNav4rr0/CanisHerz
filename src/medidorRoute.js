@@ -12,19 +12,21 @@ const MedidorRoute = () => {
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [selectedDog, setSelectedDog] = useState(null);
-  const [beatAvg, setBeatAvg] = useState(null); // Armazena o valor de beatAvg
+  const [beatAvg, setBeatAvg] = useState(null); // Stores the beatAvg value
   const [userId, setUserId] = useState(null);
   const [dogs, setDogs] = useState([]);
+
+  const normalRange = { min: 60, max: 120 }; // Define the normal BPM range
 
   const getUserId = () => {
     const user = auth.currentUser;
     if (user) {
-      setUserId(user.uid); // Atualiza o userId com o id do usuário logado
+      setUserId(user.uid); // Updates userId with the logged-in user's id
     }
   };
 
   const fetchCardioData = () => {
-    if (!userId) return; // Verifica se o userId está disponível
+    if (!userId) return; // If userId is not available, don't fetch data
 
     const devicesRef = collection(firestore, "DispositivosCanis");
     const q = query(devicesRef, where("userID", "==", userId));
@@ -33,11 +35,11 @@ const MedidorRoute = () => {
       q,
       (snapshot) => {
         if (snapshot.empty) {
-          setBeatAvg(null); // Caso não haja dados, limpa o valor de beatAvg
+          setBeatAvg(null); // Clear the value if no data
         } else {
           snapshot.docs.forEach((doc) => {
             const data = doc.data();
-            setBeatAvg(data.beatAvg || null); // Armazena o valor de beatAvg
+            setBeatAvg(data.beatAvg || null); // Set the beatAvg value
           });
         }
       },
@@ -50,14 +52,11 @@ const MedidorRoute = () => {
   };
 
   const fetchDogs = () => {
-    if (!userId) return; // Verifica se o userId está disponível
-  
-    // Referência à coleção de usuários
+    if (!userId) return; // If userId is not available, don't fetch dogs
+
     const userRef = firestore.collection('Tutores').doc(userId);
-  
-    // Referência à subcoleção de cães
     const dogsRef = userRef.collection('Cachorros');
-  
+
     const unsubscribe = dogsRef.onSnapshot((snapshot) => {
       if (!snapshot.empty) {
         const fetchedDogs = snapshot.docs.map((doc) => {
@@ -70,31 +69,27 @@ const MedidorRoute = () => {
             porte: data.Porte
           };
         });
-        setDogs(fetchedDogs); // Atualiza o estado com os cães encontrados
+        setDogs(fetchedDogs);
       } else {
-        setDogs([]); // Caso não haja cães, limpa a lista
+        setDogs([]);
       }
     }, (error) => {
       console.error("Erro ao buscar cães:", error);
     });
-  
-    // Retorna a função de unsubscribe para limpar a escuta quando o componente for desmontado
+
     return unsubscribe;
   };
-  
 
   useEffect(() => {
-    getUserId(); // Chama a função para obter o userId
-  
-    const unsubscribeCardio = fetchCardioData(); // Chama a função para buscar os dados de batimentos
-    const unsubscribeDogs = fetchDogs(); // Inicia a escuta dos cães
-  
-    return () => {
-      if (unsubscribeCardio) unsubscribeCardio(); // Cancela a escuta dos dados de batimentos
-      if (unsubscribeDogs) unsubscribeDogs(); // Cancela a escuta dos cães
-    };
-  }, [userId]); 
+    getUserId();
+    const unsubscribeCardio = fetchCardioData();
+    const unsubscribeDogs = fetchDogs();
 
+    return () => {
+      if (unsubscribeCardio) unsubscribeCardio();
+      if (unsubscribeDogs) unsubscribeDogs();
+    };
+  }, [userId]);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
@@ -108,9 +103,19 @@ const MedidorRoute = () => {
     setSelectedDog(dog);
   };
 
+  // Function to determine the heart rate status
+  const getHeartRateStatus = () => {
+    if (beatAvg === null) return "N/A";
+    if (beatAvg < normalRange.min) return "Baixo";
+    if (beatAvg > normalRange.max) return "Alto";
+    return "Normal";
+  };
+
+  const shouldShowInstructionsButton = beatAvg !== null && (beatAvg < normalRange.min || beatAvg > normalRange.max);
+
   return (
     <Provider contentContainerStyle={styles.scrollViewContainer}>
-      <ScrollView >
+      <ScrollView>
         <ImageBackground
           source={require('../assets/header.png')}
           style={styles.headerBackground}
@@ -122,7 +127,7 @@ const MedidorRoute = () => {
         </ImageBackground>
 
         <View style={styles.infoContainer}>
-        <Text style={styles.petInfo}>Informações do Cão</Text>
+          <Text style={styles.petInfo}>Informações do Cão</Text>
           <Text style={styles.petDetails}>Nome: {selectedDog ? selectedDog.nome : "NA"}</Text>
           <Text style={styles.petDetails}>Nascimento: {selectedDog ? selectedDog.nascimento : "NA"}</Text>
           <Text style={styles.petDetails}>Peso: {selectedDog ? selectedDog.peso : "NA"}</Text>
@@ -130,7 +135,7 @@ const MedidorRoute = () => {
         </View>
 
         <List.Section>
-          <List.Accordion  
+          <List.Accordion
             title="Cães cadastrados"
             expanded={expanded}
             onPress={handlePress}
@@ -138,15 +143,14 @@ const MedidorRoute = () => {
             titleStyle={styles.accordionTitle}
             description={selectedDog ? `Cão selecionado: ${selectedDog.nome}` : "Selecione um cão para medir os batimentos"}
           >
-            <View style={styles.accordionItemContainer} >
+            <View style={styles.accordionItemContainer}>
               <ScrollView style={styles.accordionItemsScroll}>
                 {dogs.map((dog) => (
-
                   <List.Item
-                  key={dog.id}
-                  title={dog.nome}
-                  style={[styles.accordionItem, selectedDog?.id === dog.id && styles.selectedDog]}
-                  onPress={() => selectDog(dog)}
+                    key={dog.id}
+                    title={dog.nome}
+                    style={[styles.accordionItem, selectedDog?.id === dog.id && styles.selectedDog]}
+                    onPress={() => selectDog(dog)}
                   />
                 ))}
               </ScrollView>
@@ -157,30 +161,36 @@ const MedidorRoute = () => {
         <View style={styles.container}>
           <View style={styles.bpmContainer}>
             <View style={styles.heartContainer}>
-            <Text style={styles.bpmLabel}>BPM</Text>
-              <Text style={styles.bpmText}>{beatAvg !== null ? beatAvg : "Nenhum dado disponível"}</Text>
+              <Text style={styles.bpmLabel}>BPM</Text>
+              <Text style={styles.bpmText}>
+                {beatAvg !== null ? beatAvg : "N/A"}
+              </Text>
               <View style={styles.iconC}>
                 <Icon
-                  source="heart"
+                  name="heart"
                   size={24}
                   color="#E81616"
                   style={styles.heartIcon}
                 />
               </View>
-
             </View>
-              <Text style={styles.resultado}><Icon source="check" size={16} style={styles.heartIcon} /> Normal </Text>
+            <Text style={styles.resultado}>
+              <Icon name="check" size={16} style={styles.heartIcon} />
+              {getHeartRateStatus()}
+            </Text>
           </View>
 
-          <Button
-            icon="information"
-            mode="contained"
-            onPress={showModal}
-            style={styles.button}
-            labelStyle={styles.label}
-          >
-            Instruções
-          </Button>
+          {shouldShowInstructionsButton && (
+            <Button
+              icon="information"
+              mode="contained"
+              onPress={showModal}
+              style={styles.button}
+              labelStyle={styles.label}
+            >
+              Instruções
+            </Button>
+          )}
         </View>
 
         <Portal>
@@ -195,10 +205,10 @@ const MedidorRoute = () => {
               {'\n\n'}
               4. Evite RCP sem orientação: Só realize RCP com instrução veterinária, pois técnicas erradas podem prejudicar o cão.
             </Text>
-            <View style={styles.modalButtonContainer}>  
-            <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
-              Voltar
-            </Button>
+            <View style={styles.modalButtonContainer}>
+              <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
+                Voltar
+              </Button>
             </View>
           </Modal>
         </Portal>
@@ -218,8 +228,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
-    
-    
+  },
+  bpmText:{
+    fontSize:20,
   },
   headerImage: {
     resizeMode: 'cover',
@@ -260,7 +271,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#808080',
-    
+
   },
   accordionTitle: {
     fontSize: 18,

@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, ImageBackground, Modal, SafeAreaView, Animated, Alert, FlatList, TouchableOpacity} from 'react-native';
+import { View, Text, StyleSheet, Image, ImageBackground, Modal, SafeAreaView, Animated, Alert, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import { Button, Provider, IconButton, Card, Icon, Portal, Dialog, SegmentedButtons, List } from 'react-native-paper';
 import { firestore, auth } from './firebaseConfig';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 const HomeRoute = () => {
-
-  // thema 
-
   const customTheme = {
     colors: {
       primary: "rgb(180, 39, 31)",
@@ -52,7 +49,7 @@ const HomeRoute = () => {
       backdrop: "rgba(59, 45, 43, 0.4)"
     }
   };
-  
+
   const [batteryPercentage, setBatteryPercentage] = useState(100);
   const [visible, setVisible] = useState(false);
   const [value, setValue] = useState('cadastrados'); // Valor inicial para o SegmentedButtons
@@ -66,21 +63,19 @@ const HomeRoute = () => {
     setBatteryPercentage((prev) => Math.max(prev - amount, 0)); // Reduce battery but not below 0
   };
 
-  
-
   const getBatteryIconAndColor = () => {
     let icon = "";
     let color = "";
 
     if (batteryPercentage > 90) {
       icon = "battery";
-      color = "#00FF00"; // Verde
+      color = "#36ab00"; // Verde
     } else if (batteryPercentage > 90) {
       icon = "battery-90";
-      color = "#00FF00"; // Verde
+      color = "#36ab00"; // Verde
     } else if (batteryPercentage > 80) {
       icon = "battery-80";
-      color = "#00FF00"; // Verde
+      color = "#36ab00"; // Verde
     } else if (batteryPercentage > 70) {
       icon = "battery-70";
       color = "#ADFF2F"; // Amarelo-Verde
@@ -160,11 +155,12 @@ const HomeRoute = () => {
       <ImageBackground
         style={[styles.capa, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }]}
         source={require('../assets/capa3.png')}
-      >
+        >
         <View style={styles.imgContainer}>
           <Image style={styles.dog} source={require('../assets/dog.png')} />
         </View>
       </ImageBackground>
+        <ScrollView>
       <View style={styles.container}>
         <Portal>
           <Modal visible={visible} transparent animationType="fade" onShow={fetchDevices}>
@@ -181,45 +177,46 @@ const HomeRoute = () => {
                       { value: 'naoCadastrados', label: 'Desconhecidos' },
                     ]}
                   />
-                <Animated.View style={{ opacity }}>
-                {value === 'cadastrados' ? (
-                  <FlatList
-                    data={devices.filter(device => device.userID === auth.currentUser?.uid)}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                      <View style={styles.modalArea}>
-                        <List.Item
-                          title={`MAC: ${item.macAddress}`}
-                          description={`Battery Level: ${item.batteryLevel || 'N/A'}`}
-                          left={(props) => <List.Icon {...props} icon="folder" />}
-                          onPress={() => {
-                            handleDeviceSelect(item);
-                            hideModal();
-                          }}
+                  <Animated.View style={{ opacity }}>
+                   
+                      {value === 'cadastrados' ? (
+                        <FlatList
+                          data={devices.filter(device => device.userID === auth.currentUser?.uid)}
+                          keyExtractor={(item) => item.id}
+                          renderItem={({ item }) => (
+                            <View style={styles.modalArea}>
+                              <List.Item
+                                title={`MAC: ${item.macAddress}`}
+                                description={`Battery Level: ${item.batteryLevel || 'N/A'}`}
+                                left={(props) => <List.Icon {...props} icon="folder" />}
+                                onPress={() => {
+                                  handleDeviceSelect(item);
+                                  hideModal();
+                                }}
+                              />
+                            </View>
+                          )}
                         />
-                      </View>
-                    )}
-                  />
-                ) : (
-                  <FlatList
-                    data={devices.filter(device => !device.userID)}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                      <View style={styles.modalArea}>
-                        <List.Item
-                          title={`MAC: ${item.macAddress}`}
-                          description={`Battery Level: ${item.batteryLevel || 'N/A'}`}
-                          left={(props) => <List.Icon {...props} icon="folder" />}
-                          onPress={() => {
-                            handleDeviceSelect(item);
-                            hideModal();
-                          }}
+                      ) : (
+                        <FlatList
+                          data={devices.filter(device => !device.userID)}
+                          keyExtractor={(item) => item.id}
+                          renderItem={({ item }) => (
+                            <View style={styles.modalArea}>
+                              <List.Item
+                                title={`MAC: ${item.macAddress}`}
+                                description={`Battery Level: ${item.batteryLevel || 'N/A'}`}
+                                left={(props) => <List.Icon {...props} icon="folder" />}
+                                onPress={() => {
+                                  handleDeviceSelect(item);
+                                  hideModal();
+                                }}
+                              />
+                            </View>
+                          )}
                         />
-                      </View>
-                    )}
-                  />
-                )}
-              </Animated.View>
+                      )}
+                  </Animated.View>
                 </Dialog.Content>
                 <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
                   Voltar
@@ -228,6 +225,7 @@ const HomeRoute = () => {
             </View>
           </Modal>
         </Portal>
+
         <View style={styles.row}>
           <View style={styles.column2}>
             <Card mode="outlined" style={[styles.card, { height: 140, backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
@@ -252,13 +250,17 @@ const HomeRoute = () => {
             </Card>
           </View>
         </View>
-        <Card mode="outlined" style={[styles.card, { width: '100%', backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
-          <Card.Title title="Aviso" />
-          <Card.Content>
-            <Text style={{ fontSize: 20 }}>Se houver outro canino, adicione-o na página 'Conta' do app.</Text>
-          </Card.Content>
-        </Card>
+
+          <Card mode="outlined" style={[styles.card, { width: '100%', backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
+            <Card.Title title="Aviso" />
+            <Card.Content>
+              <Text style={{ fontSize: 20 }}>
+                Se houver outro canino, adicione-o na página 'Conta' do app.
+              </Text>
+            </Card.Content>
+          </Card>
       </View>
+        </ScrollView>
     </Provider>
   );
 };
@@ -332,8 +334,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF8F7',
     borderRadius: 24,
   },
-
-
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo escurecido
@@ -345,15 +345,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     width: '90%',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  modalContent: {
-    fontSize: 16,
-    marginBottom: 20,
   },
   modalArea: {
     flexDirection: 'row',
@@ -371,5 +362,3 @@ const styles = StyleSheet.create({
 });
 
 export default HomeRoute;
-
-
