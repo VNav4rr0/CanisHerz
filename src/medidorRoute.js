@@ -14,7 +14,7 @@ import {
 import { Button, Modal, Portal, Provider, List } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { firestore, auth } from "./firebaseConfig";
-import { collection, query, where, onSnapshot, addDoc } from "firebase/firestore";
+import { doc, collection, query, where, onSnapshot, addDoc } from "firebase/firestore";
 import dayjs from "dayjs";
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -95,46 +95,43 @@ const MedidorRoute = () => {
     return unsubscribe;
   };
 
-  const saveHeartRateData = async () => {
-    // Log para ver o estado de beatValues
-    console.log("Tentando salvar dados... BeatValues:", beatValues);
-  
-    // Verifique se há um cão selecionado
-    if (!selectedDog) {
-      console.log("Nenhum cão selecionado");
-      return;
-    }
-  
-    // Verifique se o array beatValues está vazio
-    if (beatValues.length === 0) {
-      console.log("Batimentos ainda não coletados.");
-      return; // Não prosseguir com a operação de salvar se os batimentos estiverem vazios
-    }
-  
-    // Se beatValues não estiver vazio, continue com a lógica de salvar
-    const highest = Math.max(...beatValues);
-    const lowest = Math.min(...beatValues);
-    const average = (beatValues.reduce((a, b) => a + b, 0) / beatValues.length).toFixed(2);
-    const timestamp = new Date();
-  
-    try {
-      // Salvar os dados no Firestore
-      const dogRef = firestore.collection("Tutores").doc(userId).collection("Cachorros").doc(selectedDog.id);
-      const statsRef = dogRef.collection("DadosDiarios");
-  
-      await addDoc(statsRef, {
-        AltoPico: highest,
-        BaixoPico: lowest,
-        Media: Number(average),
-        Data: timestamp,
-      });
-  
-      console.log("Dados salvos com sucesso:", { highest, lowest, average, timestamp });
-      setBeatValues([]);  // Reset após salvar os dados
-    } catch (error) {
-      console.error("Erro ao salvar os dados:", error);
-    }
-  };
+  // Suponha que você receba os batimentos de algum sensor
+const addHeartRate = async(rate) => {
+  setBeatValues(beatAvg => [...beatAvg, rate]); // Adiciona o novo valor ao array
+};
+
+
+ const saveHeartRateData = async () => {
+  if (!selectedDog) {
+    console.log("Nenhum cão selecionado");
+    return;
+  }
+
+  addHeartRate(beatAvg);
+
+  const highest = Math.max(...beatValues);
+  const lowest = Math.min(...beatValues);
+  const average = (beatValues.reduce((a, b) => a + b, 0) / beatValues.length).toFixed(2);
+  const timestamp = new Date();
+
+  try {
+    const dogRef = doc(firestore, "Tutores", userId, "Cachorros", selectedDog.id);
+    const statsRef = collection(dogRef, "DadosDiarios");
+
+    await addDoc(statsRef, {
+      AltoPico: highest,
+      BaixoPico: lowest,
+      Media: Number(average),
+      Data: timestamp,
+    });
+
+    console.log("Dados salvos com sucesso:", { highest, lowest, average, timestamp });
+    setBeatValues([]);
+  } catch (error) {
+    console.error("Erro ao salvar os dados:", error);
+  }
+};
+
   
   
 
@@ -148,7 +145,7 @@ const MedidorRoute = () => {
       } else {
         console.log("Aguarde a seleção de um cão.");
       }
-    }, 60 * 1000); // 1 minuto
+    }, 60 * 100); // 1 minuto
 
     return () => clearInterval(interval); // Limpa o intervalo ao desmontar
   }, [selectedDog]); // Adiciona 'selectedDog' como dependência
