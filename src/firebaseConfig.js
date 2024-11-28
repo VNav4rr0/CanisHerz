@@ -22,9 +22,4 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const firestore = firebase.firestore();
 
-// Set persistence for auth to LOCAL
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch((error) => {
-  console.error('Erro ao configurar persistência de autenticação:', error);
-});
-
 export { auth, firestore };

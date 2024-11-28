@@ -323,8 +323,6 @@ const PerfilRoute = () => {
         }}
       />
     </Portal>
-          <Button mode="contained" icon="logout" onPress={handleLogout} style={styles.button} labelStyle={styles.label}>Sair da Conta</Button>
-        <Button mode="contained" icon="delete" onPress={promptForPassword} style={styles.button} labelStyle={styles.label} >Excluir Conta</Button>
         </View>
       </ScrollView>
     </Provider>
