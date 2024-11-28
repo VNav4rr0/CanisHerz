@@ -14,7 +14,8 @@ import {
 import { Button, Modal, Portal, Provider, List } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { firestore, auth } from "./firebaseConfig";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, addDoc } from "firebase/firestore";
+import dayjs from "dayjs";
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -26,6 +27,7 @@ const MedidorRoute = () => {
   const [selectedDog, setSelectedDog] = useState(null);
   const [beatAvg, setBeatAvg] = useState(null); // Stores the beatAvg value
   const [userId, setUserId] = useState(null);
+  const [beatValues, setBeatValues] = useState([]);
   const [dogs, setDogs] = useState([]);
   const heartScale = useState(new Animated.Value(1))[0]; // Animation state for heart pulsing
 
@@ -93,16 +95,78 @@ const MedidorRoute = () => {
     return unsubscribe;
   };
 
+  const saveHeartRateData = async () => {
+    // Log para ver o estado de beatValues
+    console.log("Tentando salvar dados... BeatValues:", beatValues);
+  
+    // Verifique se há um cão selecionado
+    if (!selectedDog) {
+      console.log("Nenhum cão selecionado");
+      return;
+    }
+  
+    // Verifique se o array beatValues está vazio
+    if (beatValues.length === 0) {
+      console.log("Batimentos ainda não coletados.");
+      return; // Não prosseguir com a operação de salvar se os batimentos estiverem vazios
+    }
+  
+    // Se beatValues não estiver vazio, continue com a lógica de salvar
+    const highest = Math.max(...beatValues);
+    const lowest = Math.min(...beatValues);
+    const average = (beatValues.reduce((a, b) => a + b, 0) / beatValues.length).toFixed(2);
+    const timestamp = new Date();
+  
+    try {
+      // Salvar os dados no Firestore
+      const dogRef = firestore.collection("Tutores").doc(userId).collection("Cachorros").doc(selectedDog.id);
+      const statsRef = dogRef.collection("DadosDiarios");
+  
+      await addDoc(statsRef, {
+        AltoPico: highest,
+        BaixoPico: lowest,
+        Media: Number(average),
+        Data: timestamp,
+      });
+  
+      console.log("Dados salvos com sucesso:", { highest, lowest, average, timestamp });
+      setBeatValues([]);  // Reset após salvar os dados
+    } catch (error) {
+      console.error("Erro ao salvar os dados:", error);
+    }
+  };
+  
+  
+
+  // Schedule saving data twice a day
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Tentando salvar dados...");
+      // Verifique se o estado de 'selectedDog' é válido antes de salvar
+      if (selectedDog) {
+        saveHeartRateData();
+      } else {
+        console.log("Aguarde a seleção de um cão.");
+      }
+    }, 60 * 1000); // 1 minuto
+
+    return () => clearInterval(interval); // Limpa o intervalo ao desmontar
+  }, [selectedDog]); // Adiciona 'selectedDog' como dependência
+
   useEffect(() => {
     getUserId();
-    const unsubscribeCardio = fetchCardioData();
-    const unsubscribeDogs = fetchDogs();
+  }, []);
 
-    return () => {
-      if (unsubscribeCardio) unsubscribeCardio();
-      if (unsubscribeDogs) unsubscribeDogs();
-    };
-  }, [userId]);
+  useEffect(() => {
+    if (userId) {
+      const unsubscribeCardio = fetchCardioData();
+      const unsubscribeDogs = fetchDogs();
+      return () => {
+        unsubscribeCardio();
+        unsubscribeDogs();
+      };
+    }
+  }, [userId]);  // A dependência apenas em userId
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
@@ -113,7 +177,10 @@ const MedidorRoute = () => {
   };
 
   const selectDog = (dog) => {
+    console.log("Selecionando cão:", dog);
     setSelectedDog(dog);
+    console.log("Estado de selectedDog após atualização:", dog); // Verifica se o estado está correto
+    setBeatValues([]); // Limpa os batimentos ao selecionar um novo cão
   };
 
   // Function to determine the heart rate status
