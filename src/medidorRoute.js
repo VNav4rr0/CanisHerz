@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager } from "react-native";
-import { Button, Modal, Portal, Provider, List, Icon } from 'react-native-paper';
+import {
+  Text,
+  StyleSheet,
+  View,
+  ScrollView,
+  ImageBackground,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  Animated,
+  Easing
+} from "react-native";
+import { Button, Modal, Portal, Provider, List } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { firestore, auth } from "./firebaseConfig";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 
@@ -15,6 +27,7 @@ const MedidorRoute = () => {
   const [beatAvg, setBeatAvg] = useState(null); // Stores the beatAvg value
   const [userId, setUserId] = useState(null);
   const [dogs, setDogs] = useState([]);
+  const heartScale = useState(new Animated.Value(1))[0]; // Animation state for heart pulsing
 
   const normalRange = { min: 60, max: 120 }; // Define the normal BPM range
 
@@ -113,6 +126,30 @@ const MedidorRoute = () => {
 
   const shouldShowInstructionsButton = beatAvg !== null && (beatAvg < normalRange.min || beatAvg > normalRange.max);
 
+  // Pulsing animation for the heart icon
+  useEffect(() => {
+    if (beatAvg !== null) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(heartScale, {
+            toValue: 1.2,
+            duration: 300,
+            useNativeDriver: true,
+            easing: Easing.ease,
+          }),
+          Animated.timing(heartScale, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+            easing: Easing.ease,
+          }),
+        ])
+      ).start();
+    } else {
+      heartScale.setValue(1); // Reset scale if no BPM (when it's 'N/A')
+    }
+  }, [beatAvg]);
+
   return (
     <Provider contentContainerStyle={styles.scrollViewContainer}>
       <ScrollView>
@@ -165,17 +202,16 @@ const MedidorRoute = () => {
               <Text style={styles.bpmText}>
                 {beatAvg !== null ? beatAvg : "N/A"}
               </Text>
-              <View style={styles.iconC}>
-                <Icon
+              <Animated.View style={[{ transform: [{ scale: heartScale }] }]}>
+                <MaterialCommunityIcons
                   name="heart"
-                  size={24}
+                  size={32}
                   color="#E81616"
                   style={styles.heartIcon}
                 />
-              </View>
+              </Animated.View>
             </View>
             <Text style={styles.resultado}>
-              <Icon name="check" size={16} style={styles.heartIcon} />
               {getHeartRateStatus()}
             </Text>
           </View>
@@ -216,7 +252,6 @@ const MedidorRoute = () => {
     </Provider>
   );
 };
-
 const styles = StyleSheet.create({
   scrollViewContainer: {
     flexGrow: 1,
@@ -229,8 +264,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
   },
-  bpmText:{
-    fontSize:20,
+  bpmText: {
+    fontSize: 20,
   },
   headerImage: {
     resizeMode: 'cover',
@@ -319,8 +354,7 @@ const styles = StyleSheet.create({
   },
   heartContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-
+    alignItems: 'flex-start',
   },
   bpmText: {
     fontSize: 64,
@@ -332,10 +366,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   heartIcon: {
-    marginLeft: 10,
-    position: 'absolute',
-    top: 0,
-    left: 0,
+   marginTop: 16,
   },
   bpmLabel: {
     fontSize: 17, // Tamanho do texto "BPM"
