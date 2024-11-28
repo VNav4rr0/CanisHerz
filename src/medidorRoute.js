@@ -196,24 +196,21 @@ const MedidorRoute = () => {
   // Pulsing animation for the heart icon
   useEffect(() => {
     if (beatAvg !== null) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(heartScale, {
-            toValue: 1.2,
-            duration: 300,
-            useNativeDriver: true,
-            easing: Easing.ease,
-          }),
-          Animated.timing(heartScale, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-            easing: Easing.ease,
-          }),
-        ])
-      ).start();
-    } else {
-      heartScale.setValue(1); // Reset scale if no BPM (when it's 'N/A')
+      // Inicia a animação apenas quando `beatAvg` muda
+      Animated.sequence([
+        Animated.timing(heartScale, {
+          toValue: 1.2,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+        Animated.timing(heartScale, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+      ]).start();
     }
   }, [beatAvg]);
 
@@ -332,7 +329,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 32,
   },
   bpmText: {
-    fontSize: 20,
+    fontSize: 10,
   },
   headerImage: {
     resizeMode: 'cover',
