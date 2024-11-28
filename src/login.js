@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Text, ImageBackground } from 'react-native';
-import { TextInput, Button, Provider, IconButton } from 'react-native-paper';
+import { StyleSheet, View, ScrollView, Text, ImageBackground, Alert, ActivityIndicator } from 'react-native';
+import { TextInput, Button, Provider, Snackbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from './firebaseConfig'; // Ajuste o caminho conforme necessário
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   const navigation = useNavigation();
+
+  // Função de validação de email
+  const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -19,18 +26,45 @@ export default function Login() {
   };
 
   const handleForgotPassword = () => {
-    // Navegar para a tela de redefinição de senha e passar o e-mail
     navigation.navigate('EsqueceuSenha', { email });
   };
 
   const handleSubmit = () => {
+    // Validação de email e senha
+    if (!isValidEmail(email)) {
+      Alert.alert('Erro', 'Por favor, insira um email válido.');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    setLoading(true);
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        console.log('Login realizado com sucesso.');
-        // A navegação para 'Home' será controlada no App.js com base na autenticação
+      .then((userCredential) => {
+        const user = userCredential.user; // Obtém o usuário autenticado
+        setLoading(false);
+        setSnackbarMessage('Login realizado com sucesso!');
+        setSnackbarVisible(true);
+
+        // Navegação para a Home após login bem-sucedido
+        navigation.navigate('Home');
+
+        // Armazenar o userID no AsyncStorage de forma sincronizada
+        AsyncStorage.setItem('userID', user.uid)
+          .then(() => {
+            console.log('userID armazenado com sucesso');
+          })
+          .catch((error) => {
+            console.error('Erro ao armazenar userID:', error);
+          });
       })
       .catch((error) => {
-        console.error('Erro ao fazer login:', error.message);
+        setLoading(false);
+        setSnackbarMessage(`Erro ao fazer login: ${error.message}`);
+        setSnackbarVisible(true);
       });
   };
 
@@ -39,13 +73,15 @@ export default function Login() {
       <ImageBackground source={require('../assets/back_login.png')} style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.titleCont}>
-            <IconButton
+            <Button
               icon="arrow-left"
               onPress={handleGoBack}
-              size={24}
-              iconColor="#fff"
+              mode="text"
+              labelStyle={{ color: '#fff' }}
               style={styles.backButton}
-            />
+            >
+              Voltar
+            </Button>
           </View>
           <View style={styles.form}>
             <Text style={styles.title}>Entrar</Text>
@@ -55,9 +91,8 @@ export default function Login() {
               onChangeText={setEmail}
               style={styles.input}
               autoCapitalize="none"
-              autoCompleteType="email"
-              textContentType="emailAddress"
               keyboardType="email-address"
+              textContentType="emailAddress"
               theme={{ colors: { primary: '#900C0A' } }}
             />
             <TextInput
@@ -68,19 +103,48 @@ export default function Login() {
               secureTextEntry
               theme={{ colors: { primary: '#900C0A' } }}
             />
-            <Button mode="text" style={styles.esqueceu} labelStyle={{ color: '#fff', fontSize: 16 }} onPress={handleForgotPassword}>
+            <Button
+              mode="text"
+              style={styles.esqueceu}
+              labelStyle={{ color: '#fff', fontSize: 16 }}
+              onPress={handleForgotPassword}
+            >
               Esqueceu a Senha?
             </Button>
           </View>
           <View>
-            <Button mode="contained" style={styles.button} labelStyle={{ color: '#fff', fontSize: 16 }} onPress={handleSubmit}>
-              Entrar
-            </Button>
-            <Button mode="outlined" labelStyle={{ color: '#fff', fontSize: 16 }} style={{ borderColor: '#fff' }} onPress={handleCadastrar}>
-              Cadastrar-se
-            </Button>
+            {loading ? (
+              <ActivityIndicator size="large" color="#B3261E" />
+            ) : (
+              <>
+                <Button
+                  mode="contained"
+                  style={styles.button}
+                  labelStyle={{ color: '#fff', fontSize: 16 }}
+                  onPress={handleSubmit}
+                >
+                  Entrar
+                </Button>
+                <Button
+                  mode="outlined"
+                  labelStyle={{ color: '#fff', fontSize: 16 }}
+                  style={styles.cadastrar}
+                  onPress={handleCadastrar}
+                >
+                  Cadastrar-se
+                </Button>
+              </>
+            )}
           </View>
         </ScrollView>
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={3000}
+          style={styles.snackbar}
+        >
+          {snackbarMessage}
+        </Snackbar>
       </ImageBackground>
     </Provider>
   );
@@ -93,15 +157,13 @@ const styles = StyleSheet.create({
   },
   form: {
     paddingTop: 200,
-    justifySelf: 'flex-end',
   },
   titleCont: {
-    position: 'relative',
+    marginBottom: 16,
   },
   backButton: {
-    position: 'absolute',
-    left: -10,
-    top: 0,
+    alignSelf: 'flex-start',
+    marginLeft: -10,
   },
   scrollContent: {
     padding: 16,
@@ -113,7 +175,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
     color: '#FFF',
-    marginTop: 50,
+    marginBottom: 50,
   },
   input: {
     backgroundColor: '#FFF',
@@ -123,38 +185,18 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   cadastrar: {
-    alignSelf: 'flex-start',
     marginTop: 10,
+    borderColor: '#FFF',
   },
   button: {
     marginBottom: 16,
     backgroundColor: '#B3261E',
     height: 40,
-    paddingVertical: 0,
-    paddingHorizontal: 10,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  overlay: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
   },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  modalButton: {
-    marginTop: 20,
-    backgroundColor: '#D64235',
+  snackbar: {
+    backgroundColor: '#900C0A',
   },
 });
