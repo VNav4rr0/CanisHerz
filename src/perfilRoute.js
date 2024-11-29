@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager, Alert } from "react-native";
 import { Provider, List, Appbar, Icon, Button, FAB, Portal, Modal, TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { doc, onSnapshot, collection } from "firebase/firestore";
+import { doc, onSnapshot, collection, query, orderBy } from "firebase/firestore";
 import { firestore, auth } from "./firebaseConfig";
 
 const PerfilRoute = () => {
@@ -63,6 +63,7 @@ const PerfilRoute = () => {
   const [selectedDog, setSelectedDog] = useState(null);
   const [dogs, setDogs] = useState([]);
   const [tutorName, setTutorName] = useState("");
+  const [dogCardioData, setDogCardioData] = useState({}); // Stores cardio data for each dog
 
   // Enable animation for Android
   if (
@@ -94,6 +95,25 @@ const PerfilRoute = () => {
       );
     }
   };
+  const fetchAllCardioData = (dogsList) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const userId = user.uid;
+    const cardioData = {};
+
+    dogsList.forEach((dog) => {
+      const cardioRef = collection(firestore, "Tutores", userId, "Cachorros", dog.id, "DadosDiarios");
+      const q = query(cardioRef, orderBy("Data", "desc"));
+
+      onSnapshot(q, (snapshot) => {
+        cardioData[dog.id] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setDogCardioData({ ...cardioData });
+      }, (error) => {
+        console.error("Error fetching cardio data:", error);
+      });
+    });
+  };
 
   const fetchDogs = () => {
     const user = auth.currentUser;
@@ -109,6 +129,7 @@ const PerfilRoute = () => {
             ...doc.data(),
           }));
           setDogs(dogsList);
+          fetchAllCardioData(dogsList);
         },
         (error) => {
           console.error("Error fetching dogs data:", error);
@@ -237,27 +258,22 @@ const PerfilRoute = () => {
 
         <View style={styles.cardioSection}>
           <Text style={styles.cardioTitle}>Dados Cardíacos</Text>
-        </View>
-
-        {Array(4)
-          .fill()
-          .map((_, index) => (
-            <View key={index} style={styles.container}>
-              <View style={styles.bpmContainer}>
+          {selectedDog && dogCardioData[selectedDog.id] ? (
+            dogCardioData[selectedDog.id].map((data) => (
+              <View key={data.id} style={styles.bpmContainer}>
                 <View style={styles.heartContainer}>
-                  <Text style={styles.bpmLabel}>
-                    <Icon source="thumb-up" size={17} style={styles.likeIcon} />{" "}
-                    Segunda
-                  </Text>
-                  <Text style={styles.bpmText}>100 BPM</Text>
+                  <Text style={styles.bpmLabel}>Data: {new Date(data.Data.seconds * 1000).toLocaleDateString()}</Text>
+                  <Text style={styles.bpmText}>Média: {data.Media} BPM</Text>
                 </View>
                 <Text style={styles.resultado}>
-                  <Icon source="check" size={16} style={styles.heartIcon} />{" "}
-                  Normal
+                  Alto: {data.AltoPico} BPM | Baixo: {data.BaixoPico} BPM
                 </Text>
               </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <Text style={styles.cardioText}>Selecione um cão para ver os dados.</Text>
+          )}
+        </View>
         <View style={styles.deleteAccountContainer}>
 
           <Portal>
@@ -437,7 +453,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     right: 0,
-    margin: 16,
+    margin: 10,
   },
 
   bpmText: {
@@ -449,7 +465,7 @@ const styles = StyleSheet.create({
   bpmLabel: {
     gap: 24,
     display: 'flex',
-    marginLeft: 8,
+    marginLeft: 2,
   },
   deleteAccountContainer: {
     marginTop: 20,
