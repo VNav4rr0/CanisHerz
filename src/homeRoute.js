@@ -54,6 +54,8 @@ const HomeRoute = () => {
   const [visible, setVisible] = useState(false);
   const [value, setValue] = useState('cadastrados'); // Valor inicial para o SegmentedButtons
   const [devices, setDevices] = useState([]);
+  const [isConnected, setIsConnected] = useState(false); // Estado para monitorar a conexão
+  const [connectedDevice, setConnectedDevice] = useState(null); // Dispositivo conectado
   const opacity = useRef(new Animated.Value(1)).current; // Valor de opacidade inicial para a animação
 
   const showModal = () => setVisible(true);
@@ -70,33 +72,18 @@ const HomeRoute = () => {
     if (batteryPercentage > 90) {
       icon = "battery";
       color = "#36ab00"; // Verde
-    } else if (batteryPercentage > 90) {
-      icon = "battery-90";
-      color = "#36ab00"; // Verde
     } else if (batteryPercentage > 80) {
       icon = "battery-80";
       color = "#36ab00"; // Verde
-    } else if (batteryPercentage > 70) {
-      icon = "battery-70";
-      color = "#ADFF2F"; // Amarelo-Verde
     } else if (batteryPercentage > 60) {
       icon = "battery-60";
       color = "#ADFF2F"; // Amarelo-Verde
-    } else if (batteryPercentage > 50) {
-      icon = "battery-50";
-      color = "#FFD700"; // Amarelo
     } else if (batteryPercentage > 40) {
       icon = "battery-40";
       color = "#FFD700"; // Amarelo
-    } else if (batteryPercentage > 30) {
-      icon = "battery-30";
-      color = "#FFA500"; // Laranja
     } else if (batteryPercentage > 20) {
       icon = "battery-20";
       color = "#FFA500"; // Laranja
-    } else if (batteryPercentage > 10) {
-      icon = "battery-10";
-      color = "#FF4500"; // Vermelho
     } else {
       icon = "battery-alert";
       color = "#FF0000"; // Vermelho Crítico
@@ -106,7 +93,7 @@ const HomeRoute = () => {
   };
 
   const { icon, color } = getBatteryIconAndColor();
-  // Função para animação de opacidade
+
   const animateView = () => {
     Animated.sequence([
       Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
@@ -114,7 +101,6 @@ const HomeRoute = () => {
     ]).start();
   };
 
-  // useEffect para alterar a view com animação sempre que `value` muda
   useEffect(() => {
     animateView();
   }, [value]);
@@ -129,7 +115,6 @@ const HomeRoute = () => {
     }
   };
 
-  // Função de seleção de dispositivo
   const handleDeviceSelect = async (device) => {
     const user = auth.currentUser;
     if (!user) {
@@ -142,11 +127,13 @@ const HomeRoute = () => {
         userID: user.uid,
       });
 
-      Alert.alert("Sucesso", "Dispositivo cadastrado com sucesso!");
-      hideModal(); // Fecha o modal ao concluir a seleção
+      setConnectedDevice(device); // Define o dispositivo conectado
+      setIsConnected(true); // Marca como conectado
+      Alert.alert("Sucesso", "Dispositivo conectado com sucesso!");
+      hideModal();
     } catch (error) {
-      console.error("Erro ao cadastrar dispositivo:", error);
-      Alert.alert("Erro", "Não foi possível cadastrar o dispositivo.");
+      console.error("Erro ao conectar dispositivo:", error);
+      Alert.alert("Erro", "Não foi possível conectar o dispositivo.");
     }
   };
 
@@ -155,30 +142,29 @@ const HomeRoute = () => {
       <ImageBackground
         style={[styles.capa, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }]}
         source={require('../assets/capa3.png')}
-        >
+      >
         <View style={styles.imgContainer}>
           <Image style={styles.dog} source={require('../assets/dog.png')} />
         </View>
       </ImageBackground>
-        <ScrollView>
-      <View style={styles.container}>
-        <Portal>
-          <Modal visible={visible} transparent animationType="fade" onShow={fetchDevices}>
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContainer}>
-                <Dialog.Icon icon="alert" />
-                <Dialog.Title style={[{ textAlign: 'center' }]}>Selecione seu Dispositivo</Dialog.Title>
-                <Dialog.Content>
-                  <SegmentedButtons
-                    value={value}
-                    onValueChange={(newValue) => setValue(newValue)}
-                    buttons={[
-                      { value: 'cadastrados', label: 'Cadastrados' },
-                      { value: 'naoCadastrados', label: 'Desconhecidos' },
-                    ]}
-                  />
-                  <Animated.View style={{ opacity }}>
-                   
+      <ScrollView>
+        <View style={styles.container}>
+          <Portal>
+            <Modal visible={visible} transparent animationType="fade" onShow={fetchDevices}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContainer}>
+                  <Dialog.Icon icon="alert" />
+                  <Dialog.Title style={{ textAlign: 'center' }}>Selecione seu Dispositivo</Dialog.Title>
+                  <Dialog.Content>
+                    <SegmentedButtons
+                      value={value}
+                      onValueChange={(newValue) => setValue(newValue)}
+                      buttons={[
+                        { value: 'cadastrados', label: 'Cadastrados' },
+                        { value: 'naoCadastrados', label: 'Desconhecidos' },
+                      ]}
+                    />
+                    <Animated.View style={{ opacity }}>
                       {value === 'cadastrados' ? (
                         <FlatList
                           data={devices.filter(device => device.userID === auth.currentUser?.uid)}
@@ -186,13 +172,10 @@ const HomeRoute = () => {
                           renderItem={({ item }) => (
                             <View style={styles.modalArea}>
                               <List.Item
-                                title={`MAC: ${item.macAddress}`}
+                                title={`Dispositivo Canis`}
                                 description={`Battery Level: ${item.batteryLevel || 'N/A'}`}
-                                left={(props) => <List.Icon {...props} icon="folder" />}
-                                onPress={() => {
-                                  handleDeviceSelect(item);
-                                  hideModal();
-                                }}
+                                left={(props) => <List.Icon {...props} icon="access-point-check" />}
+                                onPress={() => handleDeviceSelect(item)}
                               />
                             </View>
                           )}
@@ -204,52 +187,57 @@ const HomeRoute = () => {
                           renderItem={({ item }) => (
                             <View style={styles.modalArea}>
                               <List.Item
-                                title={`MAC: ${item.macAddress}`}
+                                title={`Dispositivo Canis`}
                                 description={`Battery Level: ${item.batteryLevel || 'N/A'}`}
-                                left={(props) => <List.Icon {...props} icon="folder" />}
-                                onPress={() => {
-                                  handleDeviceSelect(item);
-                                  hideModal();
-                                }}
+                                left={(props) => <List.Icon {...props} icon="access-point-plus" />}
+                                onPress={() => handleDeviceSelect(item)}
                               />
                             </View>
                           )}
                         />
                       )}
-                  </Animated.View>
-                </Dialog.Content>
-                <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
-                  Voltar
-                </Button>
+                    </Animated.View>
+                  </Dialog.Content>
+                  <Button onPress={hideModal} mode="contained" style={styles.closeButton}>
+                    Voltar
+                  </Button>
+                </View>
               </View>
-            </View>
-          </Modal>
-        </Portal>
+            </Modal>
+          </Portal>
 
-        <View style={styles.row}>
-          <View style={styles.column2}>
-            <Card mode="outlined" style={[styles.card, { height: 140, backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
-              <Card.Title
-                title="Dispositivo"
-                right={(props) => <IconButton {...props} icon="access-point-off" size={24} />}
-              />
-              <Card.Content>
-                <Text style={{ fontSize: 25 }}>Não Conectado</Text>
-              </Card.Content>
-            </Card>
-            <Button buttonColor="#BE0C12" mode="contained" onPress={showModal}>
-              Parear
-            </Button>
+          <View style={styles.row}>
+            <View style={styles.column2}>
+              <Card mode="outlined" style={[styles.card, { height: 140, backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
+                <Card.Title
+                  title="Dispositivo"
+                  right={(props) => (
+                    <IconButton
+                      {...props}
+                      icon={isConnected ? "access-point" : "access-point-off"} // Ícone muda de acordo com o estado
+                      size={24}
+                    />
+                  )}
+                />
+                <Card.Content>
+                  <Text style={{ fontSize: 25 }}>
+                    {isConnected ? "Conectado" : "Não Conectado"} {/* Texto muda dinamicamente */}
+                  </Text>
+                </Card.Content>
+              </Card>
+              <Button buttonColor="#BE0C12" mode="contained" onPress={showModal}>
+                Parear
+              </Button>
+            </View>
+            <View style={styles.column}>
+              <Card mode="outlined" style={[styles.cont, { backgroundColor: '#FFF8F7', width: '100%', borderRadius: 32 }]}>
+                <Card.Content style={styles.conteu}>
+                  <Text style={styles.fontBa}>{batteryPercentage}%</Text>
+                  <Icon source={icon} size={64} color={color} />
+                </Card.Content>
+              </Card>
+            </View>
           </View>
-          <View style={styles.column}>
-            <Card mode="outlined" style={[styles.cont, { backgroundColor: '#FFF8F7', width: '100%', borderRadius: 32 }]}>
-              <Card.Content style={styles.conteu}>
-                <Text style={styles.fontBa}>{batteryPercentage}%</Text>
-                <Icon source={icon} size={64} color={color} />
-              </Card.Content>
-            </Card>
-          </View>
-        </View>
 
           <Card mode="outlined" style={[styles.card, { width: '100%', backgroundColor: '#FFF8F7', borderRadius: 24 }]}>
             <Card.Title title="Aviso" />
@@ -259,8 +247,8 @@ const HomeRoute = () => {
               </Text>
             </Card.Content>
           </Card>
-      </View>
-        </ScrollView>
+        </View>
+      </ScrollView>
     </Provider>
   );
 };

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager, Alert } from "react-native";
-import { Provider, List, Appbar, Icon, Button, FAB, Portal } from "react-native-paper";
+import { Provider, List, Appbar, Icon, Button, FAB, Portal, Modal, TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { doc, onSnapshot, collection } from "firebase/firestore";
+import { doc, onSnapshot, collection, query, orderBy } from "firebase/firestore";
 import { firestore, auth } from "./firebaseConfig";
 
 const PerfilRoute = () => {
@@ -63,6 +63,7 @@ const PerfilRoute = () => {
   const [selectedDog, setSelectedDog] = useState(null);
   const [dogs, setDogs] = useState([]);
   const [tutorName, setTutorName] = useState("");
+  const [dogCardioData, setDogCardioData] = useState({}); // Stores cardio data for each dog
 
   // Enable animation for Android
   if (
@@ -78,7 +79,7 @@ const PerfilRoute = () => {
     if (user) {
       const userId = user.uid;
       const docRef = doc(firestore, "Tutores", userId);
-  
+
       // Use onSnapshot to listen for changes in the tutor document
       onSnapshot(
         docRef,
@@ -93,6 +94,25 @@ const PerfilRoute = () => {
         }
       );
     }
+  };
+  const fetchAllCardioData = (dogsList) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const userId = user.uid;
+    const cardioData = {};
+
+    dogsList.forEach((dog) => {
+      const cardioRef = collection(firestore, "Tutores", userId, "Cachorros", dog.id, "DadosDiarios");
+      const q = query(cardioRef, orderBy("Data", "desc"));
+
+      onSnapshot(q, (snapshot) => {
+        cardioData[dog.id] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setDogCardioData({ ...cardioData });
+      }, (error) => {
+        console.error("Error fetching cardio data:", error);
+      });
+    });
   };
 
   const fetchDogs = () => {
@@ -109,6 +129,7 @@ const PerfilRoute = () => {
             ...doc.data(),
           }));
           setDogs(dogsList);
+          fetchAllCardioData(dogsList);
         },
         (error) => {
           console.error("Error fetching dogs data:", error);
@@ -167,70 +188,42 @@ const PerfilRoute = () => {
       });
   };
 
-
-  const promptForPassword = () => {
-    Alert.prompt(
-      "Confirme com sua senha",
-      "Digite sua senha para confirmar a exclusão da conta",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          onPress: (enteredPassword) => reauthenticateAndDelete(enteredPassword),
-        },
-      ],
-      "secure-text"
-    );
+  // Lógica para confirmar exclusão
+  const [password, setPassword] = useState(''); // Armazena a senha digitada
+  const [isModalVisible, setIsModalVisible] = useState(false); // Controle do modal
+  const handleLogoutAction = () => {
+    console.log('Realizando logout...');
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Boasvindas' }],
+    });
   };
 
-  const reauthenticateAndDelete = (enteredPassword) => {
-    const user = auth.currentUser;
+  const handleDeleteAccount = () => {
+    setIsModalVisible(true); // Abre o modal
+  };
 
-    if (user && enteredPassword) {
-      const credential = EmailAuthProvider.credential(user.email, enteredPassword);
-
-      reauthenticateWithCredential(user, credential)
-        .then(() => {
-          user.delete().then(() => {
-            Alert.alert("Conta excluída", "Sua conta foi excluída com sucesso.");
-            navigation.navigate("Login");
-          });
-        })
-        .catch((error) => {
-          console.error("Erro de autenticação:", error);
-          Alert.alert("Erro", "Senha incorreta. Por favor, tente novamente.");
-        });
+  // Lógica para confirmar exclusão
+  const confirmDeleteAccount = () => {
+    if (password === 'senhaCorreta') {
+      console.log('Conta excluída com sucesso!');
+      Alert.alert('Sucesso', 'Conta excluída!');
+      setIsModalVisible(false); // Fecha o modal
     } else {
-      Alert.alert("Erro", "Não foi possível autenticar o usuário.");
+      Alert.alert('Erro', 'Senha incorreta. Tente novamente.');
     }
   };
 
   return (
     <Provider theme={customTheme}>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        
+
         <ImageBackground
           source={require("../assets/header.png")}
           style={styles.headerBackground}
           imageStyle={styles.headerImage}
         >
           <View style={styles.overlay}>
-            <Appbar.Header style={styles.header}>
-              <Appbar.Content />
-              <Appbar.Action
-                icon="plus"
-                onPress={handlePressAddNovosDogs}
-                color="#fff"
-              />
-              <Appbar.Action
-                style={styles.btn}
-                mode="contained"
-                icon="pencil"
-                onPress={handlePresseditarRoute}
-                color="#fff"
-                disabled={!selectedDog}
-              />
-            </Appbar.Header>
             <Text style={styles.petName}>{tutorName}</Text>
           </View>
         </ImageBackground>
@@ -265,65 +258,101 @@ const PerfilRoute = () => {
 
         <View style={styles.cardioSection}>
           <Text style={styles.cardioTitle}>Dados Cardíacos</Text>
-        </View>
-
-        {Array(4)
-          .fill()
-          .map((_, index) => (
-            <View key={index} style={styles.container}>
-              <View style={styles.bpmContainer}>
+          {selectedDog && dogCardioData[selectedDog.id] ? (
+            dogCardioData[selectedDog.id].map((data) => (
+              <View key={data.id} style={styles.bpmContainer}>
                 <View style={styles.heartContainer}>
-                  <Text style={styles.bpmLabel}>
-                    <Icon source="thumb-up" size={17} style={styles.likeIcon} />{" "}
-                    Segunda
-                  </Text>
-                  <Text style={styles.bpmText}>100 BPM</Text>
+                  <Text style={styles.bpmLabel}>Data: {new Date(data.Data.seconds * 1000).toLocaleDateString()}</Text>
+                  <Text style={styles.bpmText}>Média: {data.Media} BPM</Text>
                 </View>
                 <Text style={styles.resultado}>
-                  <Icon source="check" size={16} style={styles.heartIcon} />{" "}
-                  Normal
+                  Alto: {data.AltoPico} BPM | Baixo: {data.BaixoPico} BPM
                 </Text>
               </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <Text style={styles.cardioText}>Selecione um cão para ver os dados.</Text>
+          )}
+        </View>
         <View style={styles.deleteAccountContainer}>
 
-        <Portal>
-      <FAB.Group
-        theme={{
-          colors: {
-            primary: 'green',  // Cor do ícone quando o FAB está fechado
-            onPrimary: 'white', // Cor do ícone quando o FAB está aberto
-          },
-        }}
-        open={open}
-        visible={true} // Ação para tornar o FAB visível
-        icon={open ? 'calendar-today' : 'plus'}
-        actions={[
-          {
-            icon: 'logout',
-            label: 'Sair',
-            onPress: (handleLogout) => console.log('Pressed logout'),
-          },
-          {
-            icon: 'delete',
-            label: 'Excluir Conta',
-            onPress: () => console.log('Pressed delete'),
-          },
-        ]}
-        onStateChange={onStateChange}
-        onPress={() => {
-          if (open) {
-            // Ação quando o FAB estiver aberto
-            console.log('FAB open, additional actions...');
-          } else {
-            // Ação quando o FAB estiver fechado
-            console.log('FAB closed');
-          }
-        }}
-      />
-    </Portal>
+          <Portal>
+            <FAB.Group
+              theme={{
+                colors: {
+                  primary: 'green',  // Cor do ícone quando o FAB está fechado
+                  onPrimary: 'white', // Cor do ícone quando o FAB está aberto
+                },
+              }}
+              open={open}
+              visible={true} // Controla a visibilidade do FAB
+              icon={open ? 'close' : 'dots-vertical'}
+              actions={[
+                {
+                  icon: 'pencil',
+                  label: 'Editar Perfil',
+                  onPress: handlePresseditarRoute, // Chamando diretamente a função
+                },
+                {
+                  icon: 'dog',
+                  label: 'Adicionar Cães',
+                  onPress: handlePressAddNovosDogs, // Chamando diretamente a função
+                },
+                {
+                  icon: 'logout',
+                  label: 'Sair',
+                  onPress: handleLogout, // Chamando diretamente a função
+                },
+                {
+                  icon: 'delete',
+                  label: 'Excluir Conta',
+                  onPress: handleDeleteAccount,
+                },
+              ]}
+              onStateChange={onStateChange}
+              onPress={() => {
+                if (open) {
+                  console.log('FAB aberto, ações adicionais...');
+                } else {
+                  console.log('FAB fechado');
+                }
+              }}
+            />
+
+          </Portal>
         </View>
+        <Portal>
+          <Modal
+            visible={isModalVisible}
+            onDismiss={() => setIsModalVisible(false)}
+            contentContainerStyle={styles.modalContent}
+          >
+            <Text style={styles.modalTitle}>Confirme sua Senha</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite sua senha"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+            <View style={styles.buttonsContainer}>
+              <Button
+                mode="contained"
+                onPress={confirmDeleteAccount}
+                style={styles.button}
+              >
+                Confirmar
+              </Button>
+              <Button
+                mode="text"
+                onPress={() => setIsModalVisible(false)}
+                style={styles.button}
+              >
+                Cancelar
+              </Button>
+            </View>
+          </Modal>
+        </Portal>
       </ScrollView>
     </Provider>
   );
@@ -424,7 +453,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     right: 0,
-    margin: 16,
+    margin: 10,
   },
 
   bpmText: {
@@ -436,7 +465,7 @@ const styles = StyleSheet.create({
   bpmLabel: {
     gap: 24,
     display: 'flex',
-    marginLeft: 8,
+    marginLeft: 2,
   },
   deleteAccountContainer: {
     marginTop: 20,
@@ -448,6 +477,32 @@ const styles = StyleSheet.create({
   },
   label: {
     color: "#fff",
+  },
+
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    marginHorizontal: 20,
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 24,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    marginBottom: 40,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
   },
 });
 

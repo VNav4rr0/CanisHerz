@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { Text, StyleSheet, View, ScrollView, ImageBackground, LayoutAnimation, Platform, UIManager } from "react-native";
-import { Button, Modal, Portal, Provider, List, Icon } from 'react-native-paper';
+import {
+  Text,
+  StyleSheet,
+  View,
+  ScrollView,
+  ImageBackground,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  Animated,
+  Easing,
+} from "react-native";
+import { Button, Modal, Portal, Provider, List } from "react-native-paper";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { firestore, auth } from "./firebaseConfig";
-import { collection, query, where, onSnapshot, addDoc } from "firebase/firestore";
-import dayjs from "dayjs";
+import { doc, collection, query, where, onSnapshot, addDoc } from "firebase/firestore";
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -13,22 +24,23 @@ const MedidorRoute = () => {
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [selectedDog, setSelectedDog] = useState(null);
-  const [beatAvg, setBeatAvg] = useState(null); // Stores the beatAvg value
+  const [beatAvg, setBeatAvg] = useState(null); // Valor médio de BPM
   const [userId, setUserId] = useState(null);
-  const [beatValues, setBeatValues] = useState([]);
+  const [beatValues, setBeatValues] = useState([]); // Valores de BPM registrados
   const [dogs, setDogs] = useState([]);
+  const heartScale = useState(new Animated.Value(1))[0]; // Animação de batimento do coração
 
-  const normalRange = { min: 60, max: 120 }; // Define the normal BPM range
+  const normalRange = { min: 60, max: 120 }; // Intervalo normal de BPM
 
   const getUserId = () => {
     const user = auth.currentUser;
     if (user) {
-      setUserId(user.uid); // Updates userId with the logged-in user's id
+      setUserId(user.uid); // Define o ID do usuário logado
     }
   };
 
   const fetchCardioData = () => {
-    if (!userId) return; // If userId is not available, don't fetch data
+    if (!userId) return;
 
     const devicesRef = collection(firestore, "DispositivosCanis");
     const q = query(devicesRef, where("userID", "==", userId));
@@ -37,11 +49,11 @@ const MedidorRoute = () => {
       q,
       (snapshot) => {
         if (snapshot.empty) {
-          setBeatAvg(null); // Clear the value if no data
+          setBeatAvg(null);
         } else {
           snapshot.docs.forEach((doc) => {
             const data = doc.data();
-            setBeatAvg(data.beatAvg || null); // Set the beatAvg value
+            setBeatAvg(data.beatAvg || null);
           });
         }
       },
@@ -54,91 +66,36 @@ const MedidorRoute = () => {
   };
 
   const fetchDogs = () => {
-    if (!userId) return; // If userId is not available, don't fetch dogs
+    if (!userId) return;
 
-    const userRef = firestore.collection('Tutores').doc(userId);
-    const dogsRef = userRef.collection('Cachorros');
+    const userRef = firestore.collection("Tutores").doc(userId);
+    const dogsRef = userRef.collection("Cachorros");
 
-    const unsubscribe = dogsRef.onSnapshot((snapshot) => {
-      if (!snapshot.empty) {
-        const fetchedDogs = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            nome: data.Apelido,
-            nascimento: data.Nascimento,
-            peso: data.Peso,
-            porte: data.Porte
-          };
-        });
-        setDogs(fetchedDogs);
-      } else {
-        setDogs([]);
+    const unsubscribe = dogsRef.onSnapshot(
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const fetchedDogs = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              nome: data.Apelido,
+              nascimento: data.Nascimento,
+              peso: data.Peso,
+              porte: data.Porte,
+            };
+          });
+          setDogs(fetchedDogs);
+        } else {
+          setDogs([]);
+        }
+      },
+      (error) => {
+        console.error("Erro ao buscar cães:", error);
       }
-    }, (error) => {
-      console.error("Erro ao buscar cães:", error);
-    });
+    );
 
     return unsubscribe;
   };
-
-  const saveHeartRateData = async () => {
-    // Log para ver o estado de beatValues
-    console.log("Tentando salvar dados... BeatValues:", beatValues);
-  
-    // Verifique se há um cão selecionado
-    if (!selectedDog) {
-      console.log("Nenhum cão selecionado");
-      return;
-    }
-  
-    // Verifique se o array beatValues está vazio
-    if (beatValues.length === 0) {
-      console.log("Batimentos ainda não coletados.");
-      return; // Não prosseguir com a operação de salvar se os batimentos estiverem vazios
-    }
-  
-    // Se beatValues não estiver vazio, continue com a lógica de salvar
-    const highest = Math.max(...beatValues);
-    const lowest = Math.min(...beatValues);
-    const average = (beatValues.reduce((a, b) => a + b, 0) / beatValues.length).toFixed(2);
-    const timestamp = new Date();
-  
-    try {
-      // Salvar os dados no Firestore
-      const dogRef = firestore.collection("Tutores").doc(userId).collection("Cachorros").doc(selectedDog.id);
-      const statsRef = dogRef.collection("DadosDiarios");
-  
-      await addDoc(statsRef, {
-        AltoPico: highest,
-        BaixoPico: lowest,
-        Media: Number(average),
-        Data: timestamp,
-      });
-  
-      console.log("Dados salvos com sucesso:", { highest, lowest, average, timestamp });
-      setBeatValues([]);  // Reset após salvar os dados
-    } catch (error) {
-      console.error("Erro ao salvar os dados:", error);
-    }
-  };
-  
-  
-
-  // Schedule saving data twice a day
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.log("Tentando salvar dados...");
-      // Verifique se o estado de 'selectedDog' é válido antes de salvar
-      if (selectedDog) {
-        saveHeartRateData();
-      } else {
-        console.log("Aguarde a seleção de um cão.");
-      }
-    }, 60 * 1000); // 1 minuto
-
-    return () => clearInterval(interval); // Limpa o intervalo ao desmontar
-  }, [selectedDog]); // Adiciona 'selectedDog' como dependência
 
   useEffect(() => {
     getUserId();
@@ -153,7 +110,7 @@ const MedidorRoute = () => {
         unsubscribeDogs();
       };
     }
-  }, [userId]);  // A dependência apenas em userId
+  }, [userId]);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
@@ -164,13 +121,10 @@ const MedidorRoute = () => {
   };
 
   const selectDog = (dog) => {
-    console.log("Selecionando cão:", dog);
     setSelectedDog(dog);
-    console.log("Estado de selectedDog após atualização:", dog); // Verifica se o estado está correto
-    setBeatValues([]); // Limpa os batimentos ao selecionar um novo cão
+    setBeatValues([]); // Limpa os valores ao selecionar um novo cão
   };
 
-  // Function to determine the heart rate status
   const getHeartRateStatus = () => {
     if (beatAvg === null) return "N/A";
     if (beatAvg < normalRange.min) return "Baixo";
@@ -179,6 +133,80 @@ const MedidorRoute = () => {
   };
 
   const shouldShowInstructionsButton = beatAvg !== null && (beatAvg < normalRange.min || beatAvg > normalRange.max);
+
+  useEffect(() => {
+    if (beatAvg !== null) {
+      Animated.sequence([
+        Animated.timing(heartScale, {
+          toValue: 1.2,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+        Animated.timing(heartScale, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.ease,
+        }),
+      ]).start();
+    }
+  }, [beatAvg]);
+
+  // Sincroniza beatAvg com beatValues
+useEffect(() => {
+  if (beatAvg !== null) {
+    setBeatValues((prev) => [...prev, beatAvg]); // Adiciona beatAvg ao histórico
+  }
+}, [beatAvg]);
+
+const saveHeartRateData = () => {
+  if (!selectedDog) {
+    console.log("Nenhum cão selecionado.");
+    return;
+  }
+
+  const valuesToSave = beatValues.length > 0 ? beatValues : [beatAvg];
+  if (!valuesToSave || valuesToSave[0] === null) {
+    console.log("Nenhum valor de BPM disponível para salvar.");
+    return;
+  }
+
+  const highest = Math.max(...valuesToSave);
+  const lowest = Math.min(...valuesToSave);
+  const average = (valuesToSave.reduce((a, b) => a + b, 0) / valuesToSave.length).toFixed(2);
+  const timestamp = new Date();
+
+  const dogRef = doc(firestore, "Tutores", userId, "Cachorros", selectedDog.id);
+  const statsRef = collection(dogRef, "DadosDiarios");
+
+  addDoc(statsRef, {
+    AltoPico: highest,
+    BaixoPico: lowest,
+    Media: Number(average),
+    Data: timestamp,
+  })
+    .then(() => {
+      console.log("Dados salvos com sucesso:", { highest, lowest, average, timestamp });
+      setBeatValues([]); // Limpa os valores após salvar
+    })
+    .catch((error) => {
+      console.error("Erro ao salvar os dados:", error);
+    });
+};
+
+    // Agendar salvamento de dados duas vezes ao dia
+    useEffect(() => {
+      const interval = setInterval(() => {
+        console.log("Tentando salvar dados...");
+        if (selectedDog) {
+          saveHeartRateData();
+        } else {
+          console.log("Aguarde a seleção de um cão.");
+        }
+      }, 100 * 1000); 
+      return () => clearInterval(interval);
+    }, [selectedDog]);
 
   return (
     <Provider contentContainerStyle={styles.scrollViewContainer}>
@@ -232,17 +260,16 @@ const MedidorRoute = () => {
               <Text style={styles.bpmText}>
                 {beatAvg !== null ? beatAvg : "N/A"}
               </Text>
-              <View style={styles.iconC}>
-                <Icon
+              <Animated.View style={[{ transform: [{ scale: heartScale }] }]}>
+                <MaterialCommunityIcons
                   name="heart"
-                  size={24}
+                  size={32}
                   color="#E81616"
                   style={styles.heartIcon}
                 />
-              </View>
+              </Animated.View>
             </View>
             <Text style={styles.resultado}>
-              <Icon name="check" size={16} style={styles.heartIcon} />
               {getHeartRateStatus()}
             </Text>
           </View>
@@ -283,7 +310,6 @@ const MedidorRoute = () => {
     </Provider>
   );
 };
-
 const styles = StyleSheet.create({
   scrollViewContainer: {
     flexGrow: 1,
@@ -296,8 +322,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
   },
-  bpmText:{
-    fontSize:20,
+  bpmText: {
+    fontSize: 10,
   },
   headerImage: {
     resizeMode: 'cover',
@@ -386,8 +412,7 @@ const styles = StyleSheet.create({
   },
   heartContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-
+    alignItems: 'flex-start',
   },
   bpmText: {
     fontSize: 64,
@@ -399,10 +424,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   heartIcon: {
-    marginLeft: 10,
-    position: 'absolute',
-    top: 0,
-    left: 0,
+   marginTop: 16,
   },
   bpmLabel: {
     fontSize: 17, // Tamanho do texto "BPM"
