@@ -1,5 +1,8 @@
 {
   "expo": {
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "name": "Canis",
     "slug": "Canis",
     "version": "1.0.0",
@@ -17,12 +20,18 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.canisherz.Canis",
+      "versionCode": 1 
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "649be5b4-2e3e-4832-9b85-c740cd2fb5fa"
+      }
     }
   }
 }
